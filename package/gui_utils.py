@@ -1,4 +1,4 @@
-
+import os
 import copy
 import gzip
 import pickle
@@ -24,7 +24,7 @@ class RIRg_GUI:
         t60=0.,
         rirLength=22050,
         fs=44100,
-        exportFolder='',
+        exportFolder=os.getcwd(),
         outputRIRplot=False
         ) -> None:
 

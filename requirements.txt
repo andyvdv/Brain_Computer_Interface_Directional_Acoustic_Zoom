@@ -21,8 +21,6 @@ matplotlib-inline==0.1.6
 munch==2.5.0
 numpy==1.24.2
 packaging==23.0
-paderbox @ git+https://github.com/fgnt/paderbox.git@7fed5b44be2effcedb7a26778ada6c5668b1d6bd
--e git+https://github.com/fgnt/paderwasn.git@ff88f73a51228bb2cb4372f7595169dd716f4f2f#egg=paderwasn
 parso==0.8.3
 pickleshare==0.7.5
 Pillow==9.4.0
