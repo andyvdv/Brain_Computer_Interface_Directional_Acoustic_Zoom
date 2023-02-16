@@ -12,18 +12,24 @@ import matplotlib.pyplot as plt
 # In order: [audio, noise, mics]
 GRAPHELEMENTSCOLORS = np.array(['red', 'black', 'blue']) 
 RADIUS_DOTS = 3  # radius of dots used to place the elements in the canvas
+DEFAULT_NMICSPERARRAY = 5
+DEFAULT_DBWMICS = 5
+DEFAULT_ROOMDIM = 5
+DEFAULT_T60 = 0.
+DEFAULT_RIRLENGTH = 22050
+DEFAULT_FS = 44100
 class RIRg_GUI:
 
     def __init__(
         self,
         theme='DarkAmber',
         c=340,
-        nMicsPerArray=5,
-        distBwMics=5,
-        roomDim=5,
-        t60=0.,
-        rirLength=22050,
-        fs=44100,
+        nMicsPerArray=DEFAULT_NMICSPERARRAY,
+        distBwMics=DEFAULT_DBWMICS,
+        roomDim=DEFAULT_ROOMDIM,
+        t60=DEFAULT_T60,
+        rirLength=DEFAULT_RIRLENGTH,
+        fs=DEFAULT_FS,
         exportFolder=os.getcwd(),
         outputRIRplot=False
         ) -> None:
@@ -110,6 +116,7 @@ class RIRg_GUI:
 
             # Draw circles on graph
             elif event == "-GRAPH-":
+                self.update_attributes_from_user_inputs(window)
                 if any(currButtonStates):
                     graph = window['-GRAPH-']       # type: sg.Graph
                     color = GRAPHELEMENTSCOLORS[currButtonStates][0]
@@ -177,7 +184,7 @@ class RIRg_GUI:
                 graph._TKCanvas2.delete(*self.micsIds)
                 self.micsIds = []  # reset IDs list
                 self.micCoords = []
-            elif event == '-DEL ALL-':
+            elif event == '-DEL ALL COMPONENTS-':
                 graph = window['-GRAPH-']
                 graph._TKCanvas2.delete('all')
                 self.micsIds = []  # reset IDs list
@@ -186,6 +193,32 @@ class RIRg_GUI:
                 self.micCoords = []
                 self.audioCoords = []
                 self.noiseCoords = []
+                # Add grid
+                self.draw_line_at_every_meter(window)
+            elif event == '-RESET ALL-':
+                output = sg.popup_yes_no(
+                    'Reset everything?',
+                    keep_on_top=True
+                )
+                if output == 'Yes':
+                    # Reset everything
+                    graph = window['-GRAPH-']
+                    graph._TKCanvas2.delete('all')
+                    self.micsIds = []  # reset IDs list
+                    self.noiseIds = []  # reset IDs list
+                    self.audioIds = []  # reset IDs list
+                    self.micCoords = []
+                    self.audioCoords = []
+                    self.noiseCoords = []
+                    # Add grid
+                    self.draw_line_at_every_meter(window)
+                    # Reset inputs
+                    window['-NMICS INPUT-'].Update(DEFAULT_NMICSPERARRAY)
+                    window['-MICDIST-'].Update(DEFAULT_DBWMICS)
+                    window['-ROOMDIM INPUT-'].Update(DEFAULT_ROOMDIM)
+                    window['-T60 INPUT-'].Update(DEFAULT_T60)
+                    window['-RIRLEN INPUT-'].Update(DEFAULT_RIRLENGTH)
+                    window['-FS CHOICE-'].Update(DEFAULT_FS)
             elif event == '-COMPUTE RIRS-':
                 # Check for invalid inputs first
                 if len(self.micsCoords) == 0:
@@ -194,7 +227,7 @@ class RIRg_GUI:
                     print('WARNING: no source defined. Cannot compute RIRs.')
                 else:
                     # Read latest user inputs
-                    self.read_user_inputs(window)
+                    self.update_attributes_from_user_inputs(window)
                     # ===================================
                     # If all good, compute and store RIRs
                     # ===================================
@@ -209,7 +242,7 @@ class RIRg_GUI:
                                 micPos=np.array(self.micsCoords),
                                 audioPos=np.array(self.audioCoords),
                                 noisePos=np.array(self.noiseCoords),
-                                roomDims=self.rd,
+                                roomDim=self.roomDim,
                                 t60=self.t60,
                                 fsRIR=self.fs,
                                 rirLength=self.rirLength,
@@ -237,7 +270,7 @@ class RIRg_GUI:
                 
             elif event == 'Save layout':
                 # Read latest user inputs
-                self.read_user_inputs(window)
+                self.update_attributes_from_user_inputs(window)
                 # Save layout as Pickle archive
                 fname = f'GUIlayout_{get_datetime()}.pkl.gz'
                 pickle.dump(self, gzip.open(fname, 'wb'))
@@ -327,6 +360,18 @@ class RIRg_GUI:
         self.micsCoords = newCoords
         self.micsIds = newIds
 
+        # Add grid
+        self.draw_line_at_every_meter(window)
+
+    def draw_line_at_every_meter(self, window):
+        """
+        Draws a grid on the canvas, with a line marking every meter in both
+        dimensions.
+        """
+
+        graph = window['-GRAPH-']   # type: sg.Graph
+        currRoomDim = float(window['-ROOMDIM INPUT-'].get())
+
         # Draw lines at every meter
         deltaLine = graph.CanvasSize[1] / currRoomDim
 
@@ -411,11 +456,13 @@ class RIRg_GUI:
         plt.tight_layout()
 
 
-    def read_user_inputs(self, window):
+    def update_attributes_from_user_inputs(self, window):
         """Updates class parameters from user input in GUI window."""
-        self.rd = [float(window['-ROOMDIM INPUT-'].get())] * 2
+        self.numMics = int(window['-NMICS INPUT-'].get())
+        self.distBwMics = float(window['-MICDIST-'].get()) * 1e-2 # [m]
+        self.roomDim = float(window['-ROOMDIM INPUT-'].get())
         self.t60 = float(window['-T60 INPUT-'].get())
-        self.fs = int(window['-FS CHOICE-'].get() * 1e3)
+        self.fs = int(window['-FS CHOICE-'].get() * 1e3) # [Hz]
         self.rirLength = int(window['-RIRLEN INPUT-'].get())
 
 
@@ -487,7 +534,7 @@ class RIRg_GUI:
             #     enable_events=True,
             #     key='-GIF-IMAGE-'
             # )],
-            [sg.Button("RESET ALL")],
+            [sg.Button("RESET ALL", key='-RESET ALL-')],
             [sg.Sizegrip()]
         ]
 
@@ -514,7 +561,7 @@ class RIRg_GUI:
             [sg.Text('d [cm]'), sg.Input(
                 s=15, key='-MICDIST-', default_text=self.distBwMics
             )],
-            [sg.Button("Reset Components", key='-DEL ALL-')],
+            [sg.Button("Reset Components", key='-DEL ALL COMPONENTS-')],
         ]
 
         layout_params = [
@@ -571,7 +618,7 @@ def compute_rirs(
     micPos,
     audioPos,
     noisePos,
-    roomDims,
+    roomDim,
     t60,
     fsRIR,
     rirLength=None,
@@ -593,8 +640,8 @@ def compute_rirs(
         Sources coordinates [m].
     -noisePos : [Nn x 2] np.ndarray (float)
         Noise sources coordinates [m].
-    -roomDims : [2 x 1] list (float)
-        2D room dimensions [m].
+    -roomDim : float
+        Room dimension [m].
     -t60 : float
         T60 reverberation time [s].
     -fsRIR : int or float
@@ -616,7 +663,7 @@ def compute_rirs(
         RIRs between each noiise source and each microphone.
     """
 
-    rd = roomDims + [4]     # Room dimensions [x, y, z] (m)
+    rd = [roomDim, roomDim, 4]     # Room dimensions [x, y, z] (m)
     nMics = micPos.shape[0]
     nAudio = audioPos.shape[0]
     nNoise = noisePos.shape[0]
@@ -738,14 +785,26 @@ def plot_rirs(RIRsAudio, RIRsNoise):
         for jj in range(nCols):
             if jj == 0:
                 if nAudio > 0:
-                    RIRsCurr = RIRsAudio
-                    title = 'Audio sources'
+                    if ii < nAudio:
+                        RIRsCurr = RIRsAudio[:, :, ii]
+                        title = f'Audio source {ii + 1}'
+                    else:
+                        RIRsCurr = None
+                        title = ''
                 elif nNoise > 0 and nAudio == 0:
-                    RIRsCurr = RIRsNoise
-                    title = 'Noise sources'
+                    if ii < nNoise:
+                        RIRsCurr = RIRsNoise[:, :, ii]
+                        title = f'Noise source {ii + 1}'
+                    else:
+                        RIRsCurr = None
+                        title = ''
             elif jj == 1:
-                RIRsCurr = RIRsNoise
-                title = 'Noise sources'
+                if ii < nNoise:
+                    RIRsCurr = RIRsNoise[:, :, ii]
+                    title = f'Noise source {ii + 1}'
+                else:
+                    RIRsCurr = None
+                    title = ''
             # One subplot per source
             if not isinstance(axes, np.ndarray):
                 currAx = axes
@@ -755,18 +814,19 @@ def plot_rirs(RIRsAudio, RIRsNoise):
                 currAx = axes[ii]
             elif nCols > 1:
                 currAx = axes[jj]
-            for kk in range(nMics):
-                delta = np.amax(np.abs(RIRsCurr))
-                currAx.plot(
-                    RIRsCurr[:, kk, ii].T - kk * delta,
-                    label=f'Mic. #{kk+1}'
-                )
-            currAx.grid()
-            currAx.set_title(title)
-            if ii == nRows - 1:
+            # Plot
+            if RIRsCurr is not None:
+                for kk in range(nMics):
+                        delta = np.amax(np.abs(RIRsCurr))
+                        currAx.plot(
+                            RIRsCurr[:, kk].T - kk * delta,
+                            label=f'Mic. #{kk + 1}'
+                        )
+                currAx.grid()
+                currAx.set_title(title)
                 currAx.set_xlabel('Samples')
-            if ii == 0 and jj == 0:
-                currAx.legend(loc='upper right')
+                if ii == 0 and jj == 0:
+                    currAx.legend(loc='upper right')
     plt.tight_layout()
 
     return fig
