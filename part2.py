@@ -43,10 +43,12 @@ def create_micsigs(acousticScenario, nmics=3, n_audio_sources=2, n_noise_source=
     # print(mic_recs)
     return mic_recs, speech_recs, noise_recs
 
-acousticScenario = load_rirs(path="/Users/rudi/Dropbox/MSc EE/P&D ISSP/Brain_Computer_Interface_Directional_Acoustic_Zoom/rirs/rirs_20230216_16h10m08s.pkl.gz")
+acousticScenario = load_rirs(path="/Users/andyvandervaeren/Documents/Brain_Computer_Interface_Directional_Accounstric_Zoom/rirs/rirs_20230216_16h10m08s.pkl.gz")
 
-mic, _, _ = create_micsigs(acousticScenario=acousticScenario)
+mic, speech, noise = create_micsigs(acousticScenario=acousticScenario)
 
-fig, axs = plt.subplots(2, 1)
+fig, axs = plt.subplots(3, 1)
 axs[0].plot(mic[0])
-axs[1].plot(mic)
+axs[1].plot(speech[0])
+axs[2].plot(noise[0])
+plt.show()
