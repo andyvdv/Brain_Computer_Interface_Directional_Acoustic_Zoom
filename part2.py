@@ -4,51 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from package.gui_utils import load_rirs, plot_rirs
 from package.general import listen_to_array
+from helpers import create_micsigs
 
-def create_micsigs(acousticScenario, nmics=3, n_audio_sources=2, n_noise_source=1, duration=5):
-    fs = acousticScenario.fs
-    speechfilenames = ["speech1.wav", "speech2.wav"] #TODO check if file exists
-    noisefilenames = ["whitenoise_signal_1.wav"]
-    # Loop over speech files
-    speech_recs = []
-    for filename in speechfilenames:
-        data, samplerate = sf.read(f'sound_files/{filename}')
-        data = data[0:samplerate*duration]
-        resampled = ss.resample(data, fs*duration)
-        speech_recs.append(resampled)
-    # Loop over noise files
-    noise_recs = []
-    for filename in noisefilenames:
-        data, samplerate = sf.read(f'sound_files/{filename}')
-        data = data[0:samplerate*duration]
-        resampled = ss.resample(data, fs*duration)
-        noise_recs.append(resampled)
-    # Retrieve computed RIRs
-    mic_recs = []
-    mic_speech_recs = []
-    mic_noise_recs = []
-    for i in range(0, len(speech_recs)):
-        for j in range(0, nmics):
-            speech_rir = acousticScenario.RIRsAudio[:, j, i]
-            speech = speech_recs[i]
-            speech_rec = ss.fftconvolve(speech, speech_rir)
-            mic_speech_recs.append(speech_rec)
-            if len(noise_recs) > 0:
-                noise_rir = acousticScenario.RIRsNoise[:, j, 0]
-                noise = noise_recs[0]
-                noise_rec = ss.fftconvolve(noise, noise_rir)
-                mic_noise_recs.append(noise_rec)
-            mic_rec = (list) (np.array(speech_rec) + np.array(noise_rec))
-            mic_recs.append(mic_rec)
-    # print(mic_recs)
-    return mic_recs, speech_recs, noise_recs
+acousticScenario = load_rirs(path="/Users/rudi/Dropbox/MSc EE/P&D ISSP/Brain_Computer_Interface_Directional_Acoustic_Zoom/rirs/rirs_20230217_13h48m45s.pkl.gz")
 
-acousticScenario = load_rirs(path="/Users/andyvandervaeren/Documents/Brain_Computer_Interface_Directional_Accounstric_Zoom/rirs/rirs_20230216_16h10m08s.pkl.gz")
+mic, speech, noise = create_micsigs(acousticScenario=acousticScenario, nmics=2, speechfilenames=["speech1.wav"])
 
-mic, speech, noise = create_micsigs(acousticScenario=acousticScenario)
-
-fig, axs = plt.subplots(3, 1)
-axs[0].plot(mic[0])
-axs[1].plot(speech[0])
-axs[2].plot(noise[0])
+# fig, axs = plt.subplots(3, 1)
+fig = plt.figure()
+ax1 = fig.add_subplot(3, 1, 1)
+ax2 = fig.add_subplot(3, 1, 2,sharex=ax1)
+# ax3 = fig.add_subplot(3, 1, 2,sharex=ax1)
+# ax1.plot(mic[0])
+# ax2.plot(mic[1])
+print(acousticScenario.RIRsAudio.shape)
+ax1.plot(acousticScenario.RIRsAudio[0:1000, 0, 0])
+ax2.plot(acousticScenario.RIRsAudio[0:1000, 1, 0])
 plt.show()
+listen_to_array(mic[0], 44100)
