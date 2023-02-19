@@ -8,7 +8,7 @@ from package.general import listen_to_array
 
 def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], n_audio_sources=2, n_noise_source=1, duration=5):
     fs = acousticScenario.fs
-    print(f"The sample rate is {fs} Hz")
+    # print(f"The sample rate is {fs} Hz")
     # Loop over speech files
     speech_recs = []
     for filename in speechfilenames:
@@ -46,29 +46,31 @@ def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], 
             mic_recs.append(mic_rec)
     return mic_recs, speech_recs, noise_recs
 
-def TDOA_corr(acousticScenario):
+def TDOA_corr(acousticScenario, nmics, mic1, mic2, audiosources):
     # First do ground truth sample delay
-    peak1 = np.argmax(acousticScenario.RIRsAudio[:, 0, 0])
-    peak2 = np.argmax(acousticScenario.RIRsAudio[:, 1, 0])
+    peak1 = np.argmax(acousticScenario.RIRsAudio[:, mic1, 0])
+    peak2 = np.argmax(acousticScenario.RIRsAudio[:, mic2, 0])
     TDOA_gt = peak2 - peak1
-    print(f"Ground truth TDOA: {TDOA_gt}")
+    # print(f"Ground truth TDOA: {TDOA_gt}")
     # Crosscorrelation
     mic, speech, noise = create_micsigs(acousticScenario=acousticScenario,
-                                        nmics=2,
-                                        speechfilenames=["part1_track1_dry.wav"], 
+                                        nmics=nmics,
+                                        speechfilenames=audiosources, 
                                         noisefilenames=[])
-    corr = ss.correlate(mic[0], mic[1])
-    print(len(mic[0]))
-    print(f"Crosscorrelation maximum value: {np.argmax(corr)}")
+    mic1_tot = mic[mic1] + mic[mic1 + nmics]
+    mic2_tot = mic[mic2] + mic[mic2 + nmics]
+    corr = ss.correlate(mic1_tot, mic2_tot)
+    # print(f"Crosscorrelation maximum value: {np.argmax(corr)}")
     fig = plt.figure()
     ax1 = fig.add_subplot(2, 1, 1)
     ax2 = fig.add_subplot(2, 1, 2, sharex=ax1)
     ax1.plot(corr)
-    ax2.stem(len(mic[1]) - TDOA_gt - 1, 1)
+    ax2.stem(len(mic1_tot) - TDOA_gt - 1, 1)
     plt.show()
-    difference = (len(mic[1]) - TDOA_gt) - np.argmax(corr) - 1
-    print(f"DIFFERENCE: {difference} samples")
-    return corr
+    # difference = (len(mic[1]) - TDOA_gt) - np.argmax(corr) - 1
+    # print(f"DIFFERENCE: {difference} samples")
+    sample_diff = len(mic1_tot) - np.argmax(corr)
+    return corr, sample_diff
 
 def DOA_corr(acousticScenario):
     c = 340  # Speed of sound in air (m/s)
