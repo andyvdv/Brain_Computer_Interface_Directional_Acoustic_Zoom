@@ -42,7 +42,10 @@ class RIRg_GUI:
         self.roomDim = roomDim
         self.t60 = t60
         self.rirLength = rirLength
-        self.fs = fs
+        if int(fs) < 8000:
+            print(f'/!\ /!\ /!\ The desired sampling frequency ({int(fs)} Hz) is too low. Setting fs = 8 kHz.')
+            fs = 8000
+        self.fs = int(fs)
         self.exportFolder = exportFolder
         self.outputRIRplot = outputRIRplot
 
@@ -232,10 +235,9 @@ class RIRg_GUI:
                     # If all good, compute and store RIRs
                     # ===================================
                     if len(self.micsCoords) > 0:
-                        if len(self.audioCoords) == 0:
-                            print('No audio source present. Please place audio source(s) and try again.')
-                        elif len(self.noiseCoords) == 0:
-                            print('No noise source present. Please place noise source(s) and try again.')
+                        if len(self.audioCoords) == 0 and\
+                            len(self.noiseCoords) == 0:
+                            print('No sound source present. Please place audio and/or noise source(s) and try again.')
                         else:
                             fname = f'{self.exportFolder}/rirs_{get_datetime()}'
                             self.RIRsAudio, self.RIRsNoise = compute_rirs(
@@ -772,8 +774,14 @@ def plot_rirs(RIRsAudio, RIRsNoise):
     Output a plot of the RIRs.
     """
     nMics = RIRsAudio.shape[1]
-    nAudio = RIRsAudio.shape[-1]
-    nNoise = RIRsNoise.shape[-1]
+    if RIRsAudio is not None:
+        nAudio = RIRsAudio.shape[-1]
+    else:
+        nAudio = 0
+    if RIRsNoise is not None:
+        nNoise = RIRsNoise.shape[-1]
+    else:
+        nNoise = 0
     nCols = 1
     if nAudio > 0 and nNoise > 0:
         nCols = 2

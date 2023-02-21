@@ -71,6 +71,7 @@ def select_latest_rir(path):
     return rirFile
 
 
+
 def oracle_choice_doa(DOAestimates, asc: RIRg_GUI):
     """
     Select the DOA(s) corresponding to the target speaker(s) among all
@@ -84,16 +85,16 @@ def oracle_choice_doa(DOAestimates, asc: RIRg_GUI):
 
     oracleDOAtalkers = np.zeros(len(coordinatesTalkers))
     for ii in range(len(coordinatesTalkers)):
-        oracleDOAtalkers[ii] = np.arcsin(
-            (coordinatesMicArray[0] - coordinatesTalkers[ii][0]) /\
-            np.linalg.norm(coordinatesMicArray - coordinatesTalkers[ii])
+        oracleDOAtalkers[ii] = np.arctan2(
+            coordinatesMicArray[0] - coordinatesTalkers[ii][0],
+            coordinatesMicArray[1] - coordinatesTalkers[ii][1]
         )
 
     oracleDOAnoises = np.zeros(len(coordinatesNoises))
     for ii in range(len(coordinatesNoises)):
-        oracleDOAnoises[ii] = np.arcsin(
-            (coordinatesMicArray[0] - coordinatesNoises[ii][0]) /\
-            np.linalg.norm(coordinatesMicArray - coordinatesNoises[ii])
+        oracleDOAnoises[ii] = np.arctan2(
+            coordinatesMicArray[0] - coordinatesNoises[ii][0],
+            coordinatesMicArray[1] - coordinatesNoises[ii][1]
         )
 
     chosenDOAs = np.zeros_like(oracleDOAtalkers)
