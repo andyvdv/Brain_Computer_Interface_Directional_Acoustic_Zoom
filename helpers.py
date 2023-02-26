@@ -8,8 +8,8 @@ from package.general import listen_to_array
 
 def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], n_audio_sources=2, n_noise_source=1, duration=5):
     fs = acousticScenario.fs
-    # print(f"The sample rate is {fs} Hz")
-    # Loop over speech files
+
+    # 1) Loop over speech files
     speech_recs = []
     for filename in speechfilenames:
         data, samplerate = sf.read(f'sound_files/{filename}')
@@ -17,7 +17,8 @@ def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], 
         resampled = ss.resample(data, fs*duration)
         speech_recs.append(resampled)
         # listen_to_array(resampled, fs)
-    # Loop over noise files
+
+    # 2) Loop over noise files
     noise_recs = []
     for filename in noisefilenames:
         data, samplerate = sf.read(f'sound_files/{filename}')
@@ -25,7 +26,7 @@ def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], 
         resampled = ss.resample(data, fs*duration)
         noise_recs.append(resampled)
         
-    # Retrieve computed RIRs
+    # 3) Retrieve computed RIRs
     mic_recs = []
     mic_speech_recs = []
     mic_noise_recs = []
