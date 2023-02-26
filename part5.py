@@ -12,7 +12,7 @@ c = 340 # m/s
 DOA = np.array([])
 # For each unique combination of mics
 for j,k in itertools.combinations(range(0, nmics), 2):
-    diffs = TDOA_corr(acousticScenario, nmics, j, k, speechfiles)
+    diffs = TDOA_corr(acousticScenario, nmics, j, k, whitenoises)
     d = 0.1 * (k - j)  # Distance between microphones j and k
     doas = []
     skip = False

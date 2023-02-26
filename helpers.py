@@ -92,3 +92,8 @@ def DOA_corr(acousticScenario):
     DOA = np.arccos(dist/0.1) * 180 / math.pi
     print(f"Sample delay is {sample_delay} samples")
     print(f"DOA is {DOA}")
+
+def verify_correct_fs(acousticScenario, fs):
+    if acousticScenario.fs != fs:
+        raise Exception("Incorrect sample frequency in acoustic scenario!!!")
+    return
