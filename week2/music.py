@@ -2,6 +2,70 @@ import scipy.signal as ss
 import scipy.linalg as LA
 import numpy as np
 
+def music_narrowband(S, nmics, nsources, freqs_list, d):
+    """
+    Evaluate the pseudospectrum at the frequency bin with the highest average power
+    """
+    thetas = np.arange(0, 180, 0.5)
+    max_bin = find_max_bin(S)
+    S_mb = S[:, max_bin, :]
+    print(S_mb.shape)
+    Ryy = (np.asmatrix(S_mb) @ np.asmatrix(S_mb).getH()) / S_mb.shape[1]
+    print(Ryy)
+    # Compute the eigenvectors of the covariance matrix
+    eigvals, eigvecs = np.linalg.eig(Ryy)
+    M, N, T = S.shape
+    # Sort the eigenvectors by their corresponding eigenvalues
+    idx = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[idx]
+    eigvecs = eigvecs[:, idx]
+
+    U_N = eigvecs[:, nsources:]
+    max_freq = freqs_list[max_bin]
+    # Calculate the pseudospectrum over all thetas
+    P = []
+    for i, theta in enumerate(thetas):
+        a = np.asmatrix(steering_vector(theta, M, d, max_freq)).transpose()
+        squared_norm = a.getH() @ np.asmatrix(U_N) @ np.asmatrix(U_N).getH() @ a
+        P.append(1 / squared_norm.item())
+    return P, thetas
+
+def steering_vector(theta, M, d, f):
+    c = 343
+    theta = np.deg2rad(theta)
+    # Compute the wave number k
+    k = 2 * np.pi * f / c
+
+    # Compute the position vector for each microphone
+    pos = np.arange(M) * d
+
+    # Compute the steering vector for the given angle theta
+    a = np.exp(-1j * k * pos * np.sin(theta))
+
+    return a
+
+def stack_stfts(micsigs, fs, nfft, noverlap):
+    stack = None
+    for i, micsig in enumerate(micsigs):
+        freqs, times, zxx = ss.stft(micsig, fs=fs, nperseg=nfft, noverlap=noverlap)
+        if stack is None:
+            stack = np.empty((len(micsigs), len(freqs), len(times)), dtype="complex")
+        stack[i] = zxx
+
+    df = fs / nfft  # Hz
+    # compute the frequency index corresponding to each STFT bin
+    freq_idx = np.arange(nfft // 2 + 1)
+    # convert the frequency index to frequency values in Hertz
+    freqs_list = freq_idx * df
+    # add a DC offset to obtain the center frequency of each bin
+    freq_bounds = freqs_list + df / 2
+    return stack, freqs_list
+
+def find_max_bin(S):
+    P = np.square(np.absolute(S))
+    P_avg = P.mean(axis=(0,2))
+    return np.argmax(P_avg)
+
 def music_spectrum(stfts, p, fs):
     """
     Calculates the MUSIC spectrum for a given STFT array and number of sources.
