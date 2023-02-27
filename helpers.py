@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from package.gui_utils import load_rirs, plot_rirs
 from package.general import listen_to_array
 
-def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], n_audio_sources=2, n_noise_source=1, duration=5):
+def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], n_noise_source=1, duration=5):
     fs = acousticScenario.fs
 
     # 1) Loop over speech files
@@ -16,7 +16,6 @@ def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], 
         data = data[0:samplerate*duration]
         resampled = ss.resample(data, fs*duration)
         speech_recs.append(resampled)
-        # listen_to_array(resampled, fs)
 
     # 2) Loop over noise files
     noise_recs = []
@@ -27,9 +26,9 @@ def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], 
         noise_recs.append(resampled)
         
     # 3) Retrieve computed RIRs
-    mic_recs = []
     mic_speech_recs = []
     mic_noise_recs = []
+    mic_recs = None
     for i in range(0, len(speech_recs)):
         for j in range(0, nmics):
             speech_rir = acousticScenario.RIRsAudio[:, j, i]
@@ -41,11 +40,15 @@ def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], 
                 noise = noise_recs[0]
                 noise_rec = ss.fftconvolve(noise, noise_rir)
                 mic_noise_recs.append(noise_rec)
-                mic_rec = (list) (np.array(speech_rec) + 0.01*np.array(noise_rec))
+                mic_rec = (np.array(speech_rec) + 0.01*np.array(noise_rec))
             else:
                 mic_rec = speech_rec
-            mic_recs.append(mic_rec)
-    return mic_recs, speech_recs, noise_recs
+            if mic_recs is None:
+                mic_recs = np.empty((nmics, len(speech_recs), len(mic_rec)))
+            mic_recs[j][i] = mic_rec
+    # Sum the recorded signals for each source per mic
+    mics_total = np.sum(mic_recs, axis=(1))
+    return mics_total, mic_recs, speech_recs, noise_recs
 
 def TDOA_corr(acousticScenario, nmics, mic1, mic2, audiosources):
     # First do ground truth sample delay
