@@ -25,14 +25,13 @@ def music_narrowband(S, nmics, nsources, freqs_list, d, bin_index, angles):
     """
     Evaluate the MUSIC pseudospectrum for a specific frequency bin
     """
+    M, N, T = S.shape
     thetas = angles.copy()
-    thetas -= 90
-    # max_bin = find_max_bin(S)
-    S_mb = S[:, bin_index, :]
-    Ryy = (np.asmatrix(S_mb) @ np.asmatrix(S_mb).getH()) / S_mb.shape[1]
+    thetas -= 90 # Convert thetas to new coordinate system, measured from mic array normal
+    Sk = S[:, bin_index, :]
+    Ryy = (np.asmatrix(Sk) @ np.asmatrix(Sk).getH()) / Sk.shape[1]
     # Compute the eigenvectors of the covariance matrix
     eigvals, eigvecs = np.linalg.eig(Ryy)
-    M, N, T = S.shape
     # Sort the eigenvectors by their corresponding eigenvalues
     idx = np.argsort(eigvals)[::-1]
     eigvals = eigvals[idx]
