@@ -1,13 +1,34 @@
 import scipy.signal as ss
 import scipy.linalg as LA
 import numpy as np
+import matplotlib.pyplot as plt
 
-def music_narrowband(S, nmics, nsources, freqs_list, d):
+def music_wideband(S, nmics, nsources, freqs_list, d, angles):
     """
-    Evaluate the pseudospectrum at the frequency bin with the highest average power
+    Evaluate the MUSIC pseudospectrum as the geometric average over all frequency bins
     """
-    max_bin = find_max_bin(S)
-    S_mb = S[:, max_bin, :]
+    M, N, T = S.shape
+    P = None
+    for k in range(0, N//2 - 1):
+        Pk, _ = music_narrowband(S, nmics, nsources, freqs_list, d, k+2, angles)
+        pwr = 1 / ((N // 2) - 1)
+        Pk = np.power(Pk, pwr)    
+        if P is None:
+            P = np.empty((N//2 - 1, len(Pk)))
+            P[k] = Pk
+        else:
+            P[k] = Pk
+    P = np.prod(P, axis=(0))
+    return P, None
+
+def music_narrowband(S, nmics, nsources, freqs_list, d, bin_index, angles):
+    """
+    Evaluate the MUSIC pseudospectrum for a specific frequency bin
+    """
+    thetas = angles.copy()
+    thetas -= 90
+    # max_bin = find_max_bin(S)
+    S_mb = S[:, bin_index, :]
     Ryy = (np.asmatrix(S_mb) @ np.asmatrix(S_mb).getH()) / S_mb.shape[1]
     # Compute the eigenvectors of the covariance matrix
     eigvals, eigvecs = np.linalg.eig(Ryy)
@@ -18,18 +39,23 @@ def music_narrowband(S, nmics, nsources, freqs_list, d):
     eigvecs = eigvecs[:, idx]
 
     U_N = eigvecs[:, nsources:]
-    max_freq = freqs_list[max_bin]
+    max_freq = freqs_list[bin_index]
     # Calculate the pseudospectrum over all thetas
-    thetas = np.arange(-90, 90, 0.5)
-    P = np.empty(len(thetas))
+    
+    P = np.empty(len(thetas), dtype=np.float64)
     for i, theta in enumerate(thetas):
-        a = np.asmatrix(steering_vector(theta, M, d, max_freq))
+        a = np.asmatrix(compute_steering_vector(theta, M, d, max_freq))
         squared_norm = a.getH() @ np.asmatrix(U_N) @ np.asmatrix(U_N).getH() @ a
         P[i] = np.abs((1 / squared_norm.item()))
     thetas += 90
-    return P, thetas
+    doas = thetas[ss.find_peaks(P)[0]]
+    return P, doas
 
-def steering_vector(theta, M, d, f):
+def compute_steering_vector(theta, M, d, f):
+    """
+    Compute the steering vector, a, for a mic array of M mics a distance d apart
+    at frequency f and angle theta
+    """
     # Speed of sound in m/s
     c = 343
     # Convert angle from degrees to radians
@@ -66,3 +92,19 @@ def find_max_bin(S):
     P = np.square(np.absolute(S))
     P_avg = P.mean(axis=(0,2))
     return np.argmax(P_avg)
+
+def plot_pseudspectrum(a, s, figure_title, window_title="Figure", normalise=True, stems=[]):
+    # Normalise the spectrum to a range of [0,100] if normalise is True
+    s = (s / s[np.argmax(s)]) * 100 if normalise else s
+    # Define the figure
+    fig = plt.figure(num=window_title)
+    fig.suptitle(figure_title, fontweight='bold')
+    ax = fig.add_subplot(1,1,1)
+    ax.plot(a, s, 'b', label=f"P(θ)")
+    for stem in stems:
+        ax.stem(stem, max(s), markerfmt='', linefmt='r--', label=f"{stem}°")
+    # plt.stem(deg, max(s), markerfmt='', linefmt='r--', label=f"{deg}°")
+    
+    ax.set_ylabel('Power (Normalised)' if normalise else 'Power', fontweight='bold', fontsize='12')
+    ax.set_xlabel("Angle (θ)", fontweight='bold', fontsize='12')
+    ax.legend()
