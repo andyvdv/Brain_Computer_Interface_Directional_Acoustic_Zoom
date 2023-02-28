@@ -131,16 +131,38 @@ def part_3_5():
     s, a, doas = music_exercise(f"/rirs/Week_2/Part_2_1/45_90_135.pkl.gz", speechfilenames)
     plot_pseudspectrum(a, s, "Wideband MUSIC, 3 Sources with DOA diffs = 45°", window_title="Part 3-5", normalise=True, stems=[45, 90, 135])
 
-def part_4_1():
-    pass
+def part_4():
+    """
+    Demonstrate the effect of reverberation on the MUSIC algorithm for different source distances from the
+    microphone array. Mic array's bottom is at (4,4). Sources start at (1,1) then (2,2) and finally (3,3).
+    Room dimension is (5,5)
+
+    OBSERVATIONS:
+        For case 1 and 2 the MUSIC algorithm is unable to identify the DOA of the source from a peak in the 
+        pseudospectrum. The distance between the source and the array is large compared to the dimensions of
+        the room and thus the reverb has a major influence on the signal received by the mics.
+        For case 3 where the source is at (3,3) the pseudospectrum starts showing a peak at the correct angle.
+    """
+    speechfilenames = ["speech1.wav"]
+    s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_1/135deg0.5rev.pkl.gz", speechfilenames)
+    plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-1", normalise=True, stems=[135])
+
+    s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_2/135deg0.5rev22pos.pkl.gz", speechfilenames)
+    plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-2", normalise=True, stems=[135])
+
+    s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_2/135deg0.5rev33pos.pkl.gz", speechfilenames)
+    plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-3", normalise=True, stems=[135])
+    
+
 
 if __name__ == "__main__":
-    part_1_1()
-    part_1_5()
-    part_2_1()
-    part_3_1()
-    part_3_2()
-    part_3_3()
-    part_3_4()
-    part_3_5()
+    # part_1_1()
+    # part_1_5()
+    # part_2_1()
+    # part_3_1()
+    # part_3_2()
+    # part_3_3()
+    # part_3_4()
+    # part_3_5()
+    part_4()
     plt.show()
