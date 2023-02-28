@@ -97,7 +97,9 @@ def DOA_corr(acousticScenario):
     print(f"Sample delay is {sample_delay} samples")
     print(f"DOA is {DOA}")
 
-def verify_correct_fs(acousticScenario, fs):
+def verify_parameters(acousticScenario, fs, audiofiles):
     if acousticScenario.fs != fs:
-        raise Exception("Incorrect sample frequency in acoustic scenario!!!")
+        raise Exception(f"Incorrect sample frequency in acoustic scenario. Expected {fs}, got {acousticScenario.fs}")
+    if acousticScenario.RIRsAudio.shape[2] != len(audiofiles):
+        raise Exception(f"Incorrect number of source audio files provided. Expected {acousticScenario.RIRsAudio.shape[2]}, got {len(audiofiles)}")
     return

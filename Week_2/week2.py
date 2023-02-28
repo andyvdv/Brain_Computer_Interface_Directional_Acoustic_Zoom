@@ -1,6 +1,6 @@
 import os, sys
 sys.path.append(os.getcwd())
-from helpers import create_micsigs, verify_correct_fs
+from helpers import create_micsigs, verify_parameters
 from package.gui_utils import load_rirs
 from music import *
 import scipy.signal as ss
@@ -11,25 +11,27 @@ from matplotlib.ticker import ScalarFormatter
 
 def wideband_exercise(scenarioPath, speechfilenames):
      # Load the scenario
-    nmics = 5
-    nsources = len(speechfilenames)
     acousticScenario = load_rirs(os.getcwd() + scenarioPath)
-    verify_correct_fs(acousticScenario, 44100)
+    nsources = acousticScenario.RIRsAudio.shape[2]
+    nmics = acousticScenario.nMicsPerArray
+    d = acousticScenario.distBwMics
+    verify_parameters(acousticScenario, 44100, speechfilenames)
     # Obtain the microphone signals
     micsigs, _, _, _ = create_micsigs(acousticScenario, nmics, speechfilenames, duration=10)
     # Stack the STFTs of the microphone signals
     S, freqs_list = stack_stfts(micsigs, acousticScenario.fs, 1024, 512)
     # Find the pseudospectrum for the frequency bin with the maximum power
     thetas = np.arange(0, 180, 0.5)
-    spectrum, doas = music_wideband(S, nmics, nsources, freqs_list, 0.05, thetas)
+    spectrum, doas = music_wideband(S, nmics, nsources, freqs_list, d, thetas)
     return spectrum, thetas, doas
 
 def narrowband_exercise(scenarioPath, speechfilenames):
     # Load the scenario
-    nmics = 5
-    nsources = len(speechfilenames)
     acousticScenario = load_rirs(os.getcwd() + scenarioPath)
-    verify_correct_fs(acousticScenario, 44100)
+    nsources = acousticScenario.RIRsAudio.shape[2]
+    nmics = acousticScenario.nMicsPerArray
+    d = acousticScenario.distBwMics
+    verify_parameters(acousticScenario, 44100, speechfilenames)
     # Obtain the microphone signals
     micsigs, _, _, _ = create_micsigs(acousticScenario, nmics, speechfilenames, duration=10)
     # Stack the STFTs of the microphone signals
@@ -37,7 +39,7 @@ def narrowband_exercise(scenarioPath, speechfilenames):
     # Find the pseudospectrum for the frequency bin with the maximum power
     max_bin_index = find_max_bin(S)
     thetas = np.arange(0, 180, 0.5)
-    spectrum, doas = music_narrowband(S, nmics, nsources, freqs_list, 0.05, max_bin_index, thetas)
+    spectrum, doas = music_narrowband(S, nmics, nsources, freqs_list, d, max_bin_index, thetas)
     return spectrum, thetas, doas
 
 def part_1_1(normalise=True):
@@ -80,7 +82,7 @@ def part_2_1(normalise=True):
     """
     speechfilenames = ["speech1.wav", "speech2.wav"]
     s, a, doas= narrowband_exercise("/rirs/Week_2/Part_2_1/45_135.pkl.gz", speechfilenames)
-    plot_pseudspectrum(a, s, "Narrowband MUSIC, 2 sources with DOA diff 90º", 
+    plot_pseudspectrum(a, s, "Narrowband MUSIC, 2 sources with DOA diff 90°", 
                         window_title="Part 2", stems=[45, 135])
 
 def part_3_1():
@@ -114,9 +116,7 @@ def part_3_3():
     of the sources are <10°.
 
     OBSERVATIONS:
-        The wideband implementation definitely improves on the narrowband one, but there are clear artifacts in the averaged
-        pseudospectrum as a result of spectral leakage from the high-power bins. There are also not 2 distinct peaks at the
-        desired DOAs
+        The wideband implementation definitely improves on the narrowband one
     """
     speechfilenames = ["speech1.wav", "speech2.wav"]
     s, a, doas = wideband_exercise(f"/rirs/Week_2/Part_3/part3_1.pkl.gz", speechfilenames)
@@ -143,6 +143,9 @@ def part_3_5():
     speechfilenames = ["speech1.wav", "speech2.wav", "speech1.wav"]
     s, a, doas = wideband_exercise(f"/rirs/Week_2/Part_2_1/45_90_135.pkl.gz", speechfilenames)
     plot_pseudspectrum(a, s, "Wideband MUSIC, 3 Sources with DOA diffs = 45°", window_title="Part 3-5", normalise=True, stems=[45, 90, 135])
+
+def part_4_1():
+    pass
 
 if __name__ == "__main__":
     part_1_1()

@@ -9,9 +9,9 @@ def music_wideband(S, nmics, nsources, freqs_list, d, angles):
     """
     M, N, T = S.shape
     P = None
+    pwr = 1 / ((N // 2) - 1)
     for k in range(0, N//2 - 1):
         Pk, _ = music_narrowband(S, nmics, nsources, freqs_list, d, k+2, angles)
-        pwr = 1 / ((N // 2) - 1)
         Pk = np.power(Pk, pwr)    
         if P is None:
             P = np.empty((N//2 - 1, len(Pk)))
@@ -103,7 +103,6 @@ def plot_pseudspectrum(a, s, figure_title, window_title="Figure", normalise=True
     ax.plot(a, s, 'b', label=f"P(θ)")
     for stem in stems:
         ax.stem(stem, max(s), markerfmt='', linefmt='r--', label=f"{stem}°")
-    # plt.stem(deg, max(s), markerfmt='', linefmt='r--', label=f"{deg}°")
     
     ax.set_ylabel('Power (Normalised)' if normalise else 'Power', fontweight='bold', fontsize='12')
     ax.set_xlabel("Angle (θ)", fontweight='bold', fontsize='12')
