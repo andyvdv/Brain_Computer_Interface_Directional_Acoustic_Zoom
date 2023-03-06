@@ -39,6 +39,7 @@ def part1_closer():
     return
 
 
+
 if __name__ == "__main__":
     part1_no_noise_source()
     part1_noise_source()

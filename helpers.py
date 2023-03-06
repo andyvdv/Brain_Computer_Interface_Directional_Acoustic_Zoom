@@ -140,6 +140,7 @@ def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilename
                 noise_rec = ss.fftconvolve(noise, noise_rir)
                 mic_noise_recs.append(noise_rec)
                 mic_rec = (np.array(speech_rec) + 0.01*np.array(noise_rec))
+
             else:
                 mic_rec = speech_rec
             if mic_recs is None:
@@ -147,7 +148,8 @@ def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilename
             mic_recs[j][i] = mic_rec
     # Sum the recorded signals for each source per mic
     mics_total = np.sum(mic_recs, axis=(1))
-    
+    speech_total = np.array(np.sum(mic_speech_recs,axis=(0)))
+    noise_mic_total = np.array(np.sum(mic_noise_recs,axis=(0)))
     speech_recs = np.array(speech_recs)
 
     # PART 1 WEEK 3
@@ -156,11 +158,11 @@ def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilename
     vadmic = abs(mics_total[0]) > np.std(mics_total[0]) * 1e-3
     mic0_power = np.var(mics_total[0,vadmic==1])
 
-    vadspeech = abs(speech_recs[0]) > np.std(speech_recs[0]) * 1e-3
-    Ps = np.var(speech_recs[0, vadspeech==1])
+    vadspeech = abs(speech_total) > np.std(speech_total) * 1e-3
+    Ps = np.var(speech_total[vadspeech==1])
 
     # 2) Generate white noise and scale its power to 10% of the signal power in the first microphone
-    white_noise = np.random.normal(size=len(speech_recs[0, vadspeech==1]))
+    white_noise = np.random.normal(size=len(speech_total))
     noise_power = 0.1 * Ps
     scaled_noise = np.sqrt(noise_power / np.mean(white_noise**2)) * white_noise
 
@@ -170,7 +172,7 @@ def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilename
     noise_total = []
     
     if len(noise_recs) > 0:
-        noise_total = np.add(np.array(noise_recs)[0,vadspeech==1], scaled_noise)
+        noise_total = np.add(noise_mic_total, scaled_noise)
 
         # Compute the total noise power in that case
         Pn = np.var(noise_total)
@@ -179,6 +181,12 @@ def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilename
     SNR_first = 10*np.log10(Ps/Pn)
 
     print("SNR = {} [dB]".format(round(SNR_first,4)))
-    
+    # 5) Add the white microphone noise to each microphone signal
+    for i in range(nmics):
+        mics_total[i] = np.add(mics_total[i], scaled_noise)
 
     return mics_total, mic_recs, speech_recs, noise_recs
+
+
+def das_bf():
+    return
