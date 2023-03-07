@@ -35,9 +35,8 @@ def part_1_1(normalise=True):
     fig, axs = plt.subplots((len(source_doas) // 2), 2, sharex=True, sharey=normalise)
     for i, deg in enumerate(source_doas):
         s, a, doas = music_exercise(f"/rirs/Week_2/Part_1_1/{deg}deg.pkl.gz", speechfilenames, wideband=False)
-        if normalise:
-            # Normalise the spectrum to a range of [0,100]
-            s = (s / s[np.argmax(s)]) * 100
+        # Normalise the spectrum to a range of [0,100]
+        s = (s / s[np.argmax(s)]) * 100 if normalise else s
         axis = axs[i // 2][i % 2]
         axis.plot(a, s, 'b', label=f"P(θ)")
         axis.stem(deg, max(s), markerfmt='', linefmt='r--', label=f"{deg}°")
@@ -52,9 +51,8 @@ def part_1_5(normalise=True):
     fig, axs = plt.subplots((len(source_doas) // 2)+1, 2, sharex=True, sharey=normalise)
     for i, deg in enumerate(source_doas):
         s, a, doas = music_exercise(f"/rirs/Week_2/Part_1_5/{deg}deg.pkl.gz", speechfilenames, wideband=False)
-        if normalise:
-            # Normalise the spectrum to a range of [0,100]
-            s = (s / s[np.argmax(s)]) * 100
+        # Normalise the spectrum to a range of [0,100]
+        s = (s / s[np.argmax(s)]) * 100 if normalise else s
         axis = axs[i // 2][i % 2]
         axis.plot(a, s, 'b', label=f"P(θ)")
         axis.stem(deg, max(s), markerfmt='', linefmt='r--', label=f"{deg}°")
@@ -65,12 +63,20 @@ def part_1_5(normalise=True):
 
 def part_2_1(normalise=True):
     """
-    MUSIC Narrowband with 2 sources, one at 45deg and the other at 135deg
+    Narrowband MUSIC with 2 sources, one at 45deg and the other at 135deg
     """
     speechfilenames = ["speech1.wav", "speech2.wav"]
+    S = []
+    A = []
     s, a, doas= music_exercise("/rirs/Week_2/Part_2_1/45_135.pkl.gz", speechfilenames, wideband=False)
-    plot_pseudspectrum(a, s, "Narrowband MUSIC, 2 sources with DOA diff 90°", 
-                        window_title="Part 2", stems=[45, 135])
+    S.append(s)
+    A.append(a)
+    s, a, doas= music_exercise("/rirs/Week_2/Part_3/part3_1.pkl.gz", speechfilenames, wideband=False)
+    S.append(s)
+    A.append(a)
+    plot_multiple(A, S, "Narrowband MUSIC, 2 sources", cols=1, rows=2, stems=[[45, 135], [128.66, 135]], extra=["Big DOA diff", "Small DOA diff"])
+    # plot_pseudspectrum(a, s, "Narrowband MUSIC, 2 sources with DOA diff 90°", 
+    #                     window_title="Part 2", stems=[45, 135])
 
 def part_3_1():
     """
@@ -85,7 +91,7 @@ def part_3_1():
         implementation easily seperates them and is able to determine their individual DOAs.
     """
     speechfilenames = ["speech1.wav", "speech2.wav"]
-    s, a, doas= music_exercise("/rirs/Week_2/Part_3/part3_1.pkl.gz", speechfilenames, wideband=False)
+    
     plot_pseudspectrum(a, s, "Narrowband MUSIC, 2 Sources with DOA diff < 10°", 
                         window_title="Part 3-1", stems=[128.66, 135])
 
@@ -105,9 +111,19 @@ def part_3_3():
     OBSERVATIONS:
         The wideband implementation definitely improves on the narrowband one
     """
+    S = []
+    A = []
     speechfilenames = ["speech1.wav", "speech2.wav"]
+    
+    s, a, doas = music_exercise(f"/rirs/Week_2/Part_2_1/45_135.pkl.gz", speechfilenames)
+    S.append(s)
+    A.append(a)
     s, a, doas = music_exercise(f"/rirs/Week_2/Part_3/part3_1.pkl.gz", speechfilenames)
-    plot_pseudspectrum(a, s, "Wideband MUSIC, 2 Sources with DOA diff < 10°", window_title="Part 3-3", normalise=True, stems=[128.66, 135])
+    S.append(s)
+    A.append(a)
+    plot_multiple(A, S, "Wideband MUSIC, 2 sources", cols=1, rows=2, stems=[[45, 135], [128.66, 135]], extra=["Big DOA diff", "Small DOA diff"])
+
+    # plot_pseudspectrum(a, s, "Wideband MUSIC, 2 Sources with DOA diff < 10°", window_title="Part 3-3", normalise=True, stems=[128.66, 135])
 
 def part_3_4():
     """
@@ -144,15 +160,28 @@ def part_4():
         For case 3 where the source is at (3,3) the pseudospectrum starts showing a peak at the correct angle.
     """
     speechfilenames = ["speech1.wav"]
+    S = []
+    A = []
     s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_1/135deg0.5rev.pkl.gz", speechfilenames)
-    plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-1", normalise=True, stems=[135])
-
+    # plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-1", normalise=True, stems=[135])
+    S.append(s)
+    A.append(a)
     s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_2/135deg0.5rev22pos.pkl.gz", speechfilenames)
-    plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-2", normalise=True, stems=[135])
-
+    # plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-2", normalise=True, stems=[135])
+    S.append(s)
+    A.append(a)
     s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_2/135deg0.5rev33pos.pkl.gz", speechfilenames)
-    plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-3", normalise=True, stems=[135])
-    
+    S.append(s)
+    A.append(a)
+    s, a, doas = music_exercise(f"/rirs/Week_2/Part_4_2/135deg0.5revveryclose.pkl.gz", speechfilenames)
+    # plot_pseudspectrum(a, s, "Wideband MUSIC, 1 Sources with T60 = 0.5", window_title="Part 4-3", normalise=True, stems=[135])
+    S.append(s)
+    A.append(a)
+    plot_multiple(A, S, 
+                    "Wideband MUSIC, 1 source with T60 = 0.5, DOA = 135°", 
+                    stems=[[135],[135],[135],[135]],
+                    extra=["Dist = 4.24m", "Dist = 2.83m", "Dist = 1.41m", "Dist = 0.707m"])
+
 
 
 if __name__ == "__main__":
@@ -160,9 +189,9 @@ if __name__ == "__main__":
     # part_1_5()
     # part_2_1()
     # part_3_1()
-    part_3_2()
+    # part_3_2()
     part_3_3()
-    part_3_4()
-    part_3_5()
+    # part_3_4()
+    # part_3_5()
     # part_4()
     plt.show()

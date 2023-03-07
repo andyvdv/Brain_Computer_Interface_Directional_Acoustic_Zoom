@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def music_wideband(S, nmics, nsources, freqs_list, d, angles):
     """
-    Evaluate the MUSIC pseudospectrum as the geometric average over all frequency bins
+    Evaluate the MUSIC pseudospectrum as the geometric average of pseudospectrums over all frequency bins
     """
     M, N, T = S.shape
     P = None
@@ -14,10 +14,8 @@ def music_wideband(S, nmics, nsources, freqs_list, d, angles):
         Pk, _ = music_narrowband(S, nmics, nsources, freqs_list, d, k+2, angles)
         Pk = np.power(Pk, pwr)    
         if P is None:
-            P = np.empty((N//2 - 1, len(Pk)))
-            P[k] = Pk
-        else:
-            P[k] = Pk
+            P = np.empty((N//2 - 1, len(Pk))) 
+        P[k] = Pk
     P = np.prod(P, axis=(0))
     peaks = ss.find_peaks(P)[0]
     print(peaks)
@@ -40,11 +38,11 @@ def music_narrowband(S, nmics, nsources, freqs_list, d, bin_index, angles):
     idx = np.argsort(eigvals)[::-1]
     eigvals = eigvals[idx]
     eigvecs = eigvecs[:, idx]
-
+    # Find the noise subspace
     U_N = eigvecs[:, nsources:]
     max_freq = freqs_list[bin_index]
+
     # Calculate the pseudospectrum over all thetas
-    
     P = np.empty(len(thetas), dtype=np.float64)
     for i, theta in enumerate(thetas):
         a = np.asmatrix(compute_steering_vector(theta, M, d, max_freq))
@@ -110,3 +108,24 @@ def plot_pseudspectrum(a, s, figure_title, window_title="Figure", normalise=True
     ax.set_ylabel('Power (Normalised)' if normalise else 'Power', fontweight='bold', fontsize='12')
     ax.set_xlabel("Angle (θ)", fontweight='bold', fontsize='12')
     ax.legend()
+
+def plot_multiple(X, Y, title, normalise=True, stems=None, extra=None, cols=2, rows=None):
+    rows = len(Y) // 2 if rows == None else rows
+    fig, axs = plt.subplots(rows, cols, sharex=True, sharey=normalise)
+    fig.subplots_adjust(top=0.9)
+    for i in range(len(Y)):
+        a = X[i]
+        s = (Y[i] / Y[i][np.argmax(Y[i])]) * 100 if normalise else Y[i]
+        if cols == 1:
+            axis = axs[i]
+        elif cols == 2:
+            axis = axs[i // 2][i % 2]
+        axis.plot(a, s, 'b', label=f"P(θ)")
+        if stems is not None:
+            stem = stems[i]
+            for st in stem:
+                axis.stem(st, max(s), markerfmt='', linefmt='r--', label=f"{st}°")
+        axis.legend(title=extra[i] if extra is not None else None)
+    fig.suptitle(title, fontweight='bold')
+    fig.text(0.02, 0.5, 'Power (Normalised)' if normalise else 'Power', va='center', rotation='vertical', fontweight='bold', fontsize='12')
+    fig.text(0.5, 0.04, 'Angle (θ)', ha='center', va='center', fontweight='bold', fontsize='12')
