@@ -44,14 +44,16 @@ def part2():
     acousticScenario = load_rirs(os.getcwd() + scenarioPath)
     Q = acousticScenario.RIRsAudio.shape[2] + acousticScenario.RIRsNoise.shape[2] # Number of localized sources
     nmics = acousticScenario.numMics
-    speechfilenames = ["speech1.wav"]
+    speechfilenames = ["speech1.wav", "speech2.wav"]
+    noisefilenames = ["whitenoise_signal_1.wav"]
     d = acousticScenario.distBwMics
     wideband = True
-
+    acousticScenario.plot_asc()
     # Verify the sampling frequency is correct and the right amount of sound files are passed
-    #verify_parameters(acousticScenario, 44100, speechfilenames)
+    verify_parameters(acousticScenario, 44100, speechfilenames)
     # Obtain the microphone signals
-    micsigs, mic_recs, speech_recs, noise_recs = create_micsigs(acousticScenario, nmics, speechfilenames, duration=10)
+    micsigs, mic_recs, speech_recs, noise_recs = create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilenames,
+                                                                        duration=10)
     # Stack the STFTs of the microphone signals
     nfft = 1024
     noverlap = 512
@@ -59,14 +61,16 @@ def part2():
     # Define the angles to commpute the pseudospectrum for
     thetas = np.arange(0, 180, 0.5)
     # Compute the MUSIC pseudospectrum and DOAs
-    spectrum, doas = music_wideband(S, nmics, Q, freqs_list, d, thetas) if wideband else music_narrowband(S, nmics, Q, freqs_list, d, find_max_bin(S), thetas)
+    spectrum, doas = music_wideband(S, nmics, Q, freqs_list, d, thetas)
+    plot_pseudspectrum(thetas, spectrum, "Spectrum")
     print(micsigs)
     print(doas)
     
     
 
 if __name__ == "__main__":
-    part1_no_noise_source()
-    part1_noise_source()
-    part1_closer()
+    # part1_no_noise_source()
+    # part1_noise_source()
+    # part1_closer()
     part2()
+    plt.show()

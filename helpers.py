@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from package.gui_utils import load_rirs, plot_rirs
 from package.general import listen_to_array
 
-def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], n_noise_source=1, duration=5):
+def create_micsigs(acousticScenario, nmics, speechfilenames, noisefilenames=[], duration=5):
     fs = acousticScenario.fs
 
     # 1) Loop over speech files
@@ -105,7 +105,7 @@ def verify_parameters(acousticScenario, fs, audiofiles):
     return
 
 
-def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilenames=[], n_noise_source=1, duration=5):
+def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilenames, duration=5):
     fs = acousticScenario.fs
 
     # 1) Loop over speech files
@@ -156,7 +156,7 @@ def create_micsigs_week3(acousticScenario, nmics, speechfilenames, noisefilename
     #_________________________________________________
     # 1) Compute the target audio source signal power in the first microphone.
     vadmic = abs(mics_total[0]) > np.std(mics_total[0]) * 1e-3
-    mic0_power = np.var(mics_total[0,vadmic==1])
+    mic0_power = np.var(mics_total[0, vadmic==1])
 
     vadspeech = abs(speech_total) > np.std(speech_total) * 1e-3
     Ps = np.var(speech_total[vadspeech==1])
