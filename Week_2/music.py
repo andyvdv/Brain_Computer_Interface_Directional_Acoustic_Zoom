@@ -17,10 +17,10 @@ def music_wideband(S, nmics, nsources, freqs_list, d, angles):
             P = np.empty((N//2 - 1, len(Pk))) 
         P[k] = Pk
     P = np.prod(P, axis=(0))
-    peaks = ss.find_peaks(P)[0]
-    print(peaks)
-    n_largest_peaks = P[peaks]
-    doas = angles[peaks]
+    peaks = np.array(ss.find_peaks(P)[0])
+    idx = np.argsort(P[peaks])[::-1]
+    peaks = peaks[idx]
+    doas = angles[peaks][0:nsources]
     return P, doas
 
 def music_narrowband(S, nmics, nsources, freqs_list, d, bin_index, angles):
