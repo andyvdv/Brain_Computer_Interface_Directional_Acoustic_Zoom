@@ -111,9 +111,6 @@ def das_bf(data, DOA, num_mics, d, fs):
 
     # Initialize delay-and-sum beamformer weights
     weights = np.ones((num_mics,)) / num_mics
-    # data = mics_total.transpose()
-    print(f"Data shape = {data.shape}")
-    
     # DAS-BF
     # Apply beamformer weights
     bf_data = np.multiply(data, weights)
@@ -128,3 +125,4 @@ def das_bf(data, DOA, num_mics, d, fs):
     # Sum delayed signals
     output = np.sum(delay_mat, axis=0)
     return output
+

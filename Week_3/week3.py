@@ -9,7 +9,9 @@ import numpy as np
 from Week_2.music import *
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
-from week3_helpers import create_micsigs_wk3, das_bf
+from week3_helpers import create_micsigs_wk3, das_bf, calculate_snr
+from part2 import part_2
+from part3 import part_3
 
 def part1_no_noise_source():
     scenarioPath = "/rirs/Week_3/rirs_part1_no_noise.pkl.gz"
@@ -124,28 +126,36 @@ def DAS_EXERCISE():
     c = 343   # Speed of sound
     speech_total = np.sum(speech_recs, axis=(2))
     noise_total = np.sum(noise_recs, axis=(2))
-
+    # Find DOA nearest to 90°
     index = np.abs(doas - 90).argmin()
     DOA = doas[index]
     print(f"DOA steering towards: {DOA}")
 
     speechDAS = das_bf(speech_total, DOA, nmics, d, fs)
     noiseDAS = das_bf(noise_total, DOA, nmics, d, fs)
-
+    
     DASout = speechDAS + noiseDAS
-
-    listen_to_array(speech_total[:, 0], fs)
-    listen_to_array(speechDAS, fs)
+    
+    SNRin = calculate_snr(speech_total, noise_total)
+    SNRoutDAS = calculate_snr(speechDAS, noiseDAS)
+    print(f"SNRin: {SNRin}\nSNRoutDAS: {SNRoutDAS} ")
+    
+    
+    print(speech_total.shape)
+    GSCout = gsc_td(speech_total + noise_total, DOA, nmics, d, fs)
 
     fig, axs = plt.subplots(2, 1, sharex=True)
     axs[0].plot(speech_total[:, 0] + noise_total[:, 0])
-    axs[0].legend(title="Mic 0 recording")
+    axs[0].set_title("Mic 0 Recording")
     axs[1].plot(DASout)
+    axs[1].set_title("DAS BF Output")
+
+    # Listen to first mic recording
+    # listen_to_array(speech_total[:, 0] + noise_total[:, 0], fs)
+    # listen_to_array(DASout, fs)
+
 
 if __name__ == "__main__":
-    # part1_no_noise_source()
-    # part1_noise_source()
-    # part1_closer()
-    # part2()
-    DAS_EXERCISE()
+    # part_2()
+    part_3()
     plt.show()
