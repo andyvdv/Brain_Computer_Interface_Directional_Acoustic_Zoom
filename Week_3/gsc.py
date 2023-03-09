@@ -64,13 +64,13 @@ def gsc_fd(S, H, DOA, doa_index, thetas, freq_list, window):
     w_fas = np.zeros_like(H)
     B = []
     for j, freq in enumerate(freq_list):
-        h = np.asmatrix(H[:, doa_index, j])
+        h = np.asmatrix(H[:, doa_index, j]).T
         h_H = h.getH()
-        w_fas[:, doa_index, j] = (h / (h @ h_H))
+        w_fas[:, doa_index, j] = (h / (h_H @ h)).flatten()
         # Compute the null space of h
-        b = scipy.linalg.null_space(h)
-        B.append(b.T)
-        if not np.allclose(b.T.dot(h.T), 0):
+        b = scipy.linalg.null_space(h.T)
+        B.append(b)
+        if not np.allclose(b.T.dot(h), 0):
             raise Exception("B matrix is not correct")
             
     # GSC for each frequency bin
@@ -79,8 +79,7 @@ def gsc_fd(S, H, DOA, doa_index, thetas, freq_list, window):
         w = w_fas[:, doa_index, k]
         freq_dom_signal = S[:, k, :]
         y = freq_dom_signal.T @ w
-        
-        blocking_mat = B[k].T
+        blocking_mat = B[k]
         filter_input = freq_dom_signal.T @ blocking_mat
         
         # Implement filters
@@ -91,10 +90,10 @@ def gsc_fd(S, H, DOA, doa_index, thetas, freq_list, window):
         # Update the filter weights
         # f.update(np.abs(filter_input.T), np.abs(y))
         # out = f.filter(np.abs(filter_input))
-        Y, W = complex_multichannel_nlms(filter_input, y, 4, 0.1, 1e-10)
-        GSCout_fd[k, :] = Y.flatten()
+        Y, W = complex_multichannel_nlms(filter_input, y, 1, 0.1, 1e-10)
+        GSCout_fd[k, :] = y - Y.flatten()
     
-    print(GSCout_fd.shape)
+    # print(GSCout_fd.shape)
     # Define the overlap ratio (50% in this case)
     overlap_ratio = 0.5
 
@@ -185,3 +184,12 @@ def complex_multichannel_nlms(x, d, M, mu, eps):
         w = np.hstack((w, w_new.T))
 
     return y, w
+
+def compute_fas_bf(H, doa_index, freq):
+    # Access pre-filled look-up table to obtain FAS BF vector for given DOA and frequency
+    # Vector of multipliers is obtained from measured or generated steering vector for DOA and frequency
+    # Blocking matrix is computed such that it is orthogonal to the steering vector
+    # Return FAS BF vector
+    h = np.asmatrix(H[:, doa_index, j]).T
+    h_H = h.getH()
+    w_fas = (h / (h_H @ h)).flatten()

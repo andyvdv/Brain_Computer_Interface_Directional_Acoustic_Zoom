@@ -54,15 +54,14 @@ def week_4():
         for j, freq in enumerate(freq_list):
             A[:, i, j] = np.reshape(compute_steering_vector(theta, nmics, d, freq), (5,))
     
-    a_1 = A[0, :, :]
-    print(A[:, 170, 100])
     H = np.zeros_like(A)
     for i in range(A.shape[1]):
         for j in range(A.shape[2]):
             a = A[:, i, j]
             H[:, i, j] = a / A[0, i, j]
-    out = gsc_fd(S, H, DOA, doa_index, thetas, freq_list, sqrt_hann)
-    
+    print(H)
+    # out = gsc_fd(S, H, DOA, doa_index, thetas, freq_list, sqrt_hann)
+    out = []
     
     speech_total = np.sum(speech_recs, axis=(2))
     noise_total = np.sum(noise_recs, axis=(2))
@@ -70,10 +69,10 @@ def week_4():
     axs[0].plot(speech_total[:, 0] + noise_total[:, 0])
     axs[0].set_title("Mic 0 Recording")
     axs[1].plot(out)
-    axs[1].set_title("DAS BF Output")
+    axs[1].set_title("FD GSC Output")
     # a1 = compute_steering_vector(90, nmics, d, 100)
     # print(a1)s
-    listen_to_array(out, fs)
+    # listen_to_array(out, fs)
     
 if __name__ == "__main__":
     week_4()
