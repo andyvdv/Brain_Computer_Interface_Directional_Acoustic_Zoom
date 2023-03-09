@@ -12,6 +12,7 @@ from matplotlib.ticker import ScalarFormatter
 from week3_helpers import create_micsigs_wk3, das_bf, calculate_snr
 from part2 import part_2
 from part3 import part_3
+from gsc import gsc_td
 
 def part1_no_noise_source():
     scenarioPath = "/rirs/Week_3/rirs_part1_no_noise.pkl.gz"

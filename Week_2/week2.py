@@ -22,6 +22,7 @@ def music_exercise(scenarioPath, speechfilenames, wideband=True):
     # Stack the STFTs of the microphone signals
     nfft = 1024
     noverlap = 512
+    print(micsigs.shape)
     S, freqs_list = stack_stfts(micsigs, acousticScenario.fs, nfft, noverlap)
     # Define the angles to commpute the pseudospectrum for
     thetas = np.arange(0, 180, 0.5)
