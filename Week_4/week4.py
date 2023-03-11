@@ -1,6 +1,6 @@
 import os, sys
 sys.path.append(os.getcwd())
-from helpers import create_micsigs_week3, verify_parameters, create_micsigs
+from helpers import create_micsigs_week3, verify_parameters, create_micsigs, create_micsigs_week4
 from package.gui_utils import load_rirs
 from package.general import listen_to_array
 import scipy.signal as ss
@@ -212,7 +212,6 @@ def week_4_2():
     axs[2].set_title("FAS reconstructed")
     axs[3].plot(times, signal_reconstructed)
     axs[3].set_title("Total reconstructed signal")
-    
     
     # listen_to_array(mics_total[:, 0], fs)
     # listen_to_array(mic_0_reconstructed, fs)

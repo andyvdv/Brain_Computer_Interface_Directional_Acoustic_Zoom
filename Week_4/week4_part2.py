@@ -1,6 +1,6 @@
 import os, sys
 sys.path.append(os.getcwd())
-from helpers import create_micsigs_week3, verify_parameters, create_micsigs, DOA_corr
+from helpers import create_micsigs_week3, verify_parameters, create_micsigs, DOA_corr, create_micsigs_week4
 from package.gui_utils import load_rirs
 from package.general import listen_to_array
 import scipy.signal as ss
@@ -30,7 +30,7 @@ def part2():
     
     
     # Combine all the signals from all the scenario in the no reverberation case
-    mics_total_norev, mic_recs_norev, speech_recs_norev, noise_recs_norev = create_micsigs_wk3(acousticScenario=AS, 
+    mics_total_norev, mic_recs_norev, speech_recs_norev, noise_recs_norev = create_micsigs_week4(acousticScenario=AS, 
                                                                             nmics=nmics, 
                                                                             speechfilenames=speechfiles,
                                                                             noisefilenames=[],
@@ -38,21 +38,23 @@ def part2():
 
     for i in range(2,6):
         AS = load_rirs(os.getcwd() + "/rirs/Week_4/part2/rirs_part2_{}_0rev.pkl.gz".format(i))
-        mics_total, mic_recs, speech_recs, noise_recs = create_micsigs_wk3(acousticScenario=AS, 
+        print(AS.audioCoords)
+        mics_total, mic_recs, speech_recs, noise_recs = create_micsigs_week4(acousticScenario=AS, 
                                                                             nmics=nmics, 
                                                                             speechfilenames=speechfiles,
                                                                             noisefilenames=[],
-                                                                            duration=10)
+                                                                            duration=10,
+                                                                            startfrom=fs*(i-1)*10)
         
         mics_total_norev = np.concatenate((mics_total_norev,mics_total),axis=1)
         mic_recs_norev = np.concatenate((mic_recs_norev,mic_recs),axis=1)
         speech_recs_norev = np.concatenate((speech_recs_norev,speech_recs),axis=1)
-        noise_recs_norev = np.concatenate((noise_recs_norev,noise_recs),axis=1)
 
 
 
-    
+    listen_to_array(mics_total_norev[1],fs)
     plt.plot(mics_total_norev[1])
+    
     plt.show()
 
     
