@@ -72,10 +72,10 @@ def compute_steering_vector(theta, M, d, f):
     A = phases.reshape(-1, 1)
     return A
 
-def stack_stfts(micsigs, fs, nfft, noverlap, window=None):
+def stack_stfts(micsigs, fs, nperseg, nfft, noverlap, window=None):
     stack = None
     for i, micsig in enumerate(micsigs):
-        freqs, times, zxx = ss.stft(micsig, fs=fs, nperseg=nfft, noverlap=noverlap, window=window if window else "hann")
+        freqs, times, zxx = ss.stft(micsig, fs=fs, nperseg=nperseg, nfft=nfft, noverlap=noverlap, window=window if window is not None else "hann")
         if stack is None:
             stack = np.empty((len(micsigs), len(freqs), len(times)), dtype="complex")
         stack[i] = zxx

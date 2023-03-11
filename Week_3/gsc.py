@@ -54,7 +54,7 @@ def gsc_td(speech, noise, DOA, num_mics, d, fs, L=1024, mu=0.1):
     gsc_output = np.zeros_like(y)
     
     # Update the filter weights
-    f.update(X.T, ref)
+    f.update(X.T, y)
     gsc_output = y - np.sum(f.filter(X.T), axis=(0))
 
     return gsc_output

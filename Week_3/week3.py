@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 from week3_helpers import create_micsigs_wk3, das_bf, calculate_snr
 from part2 import part_2
-from part3 import part_3
+from part3 import part_3, part_4
 from gsc import gsc_td
 
 def part1_no_noise_source():
@@ -91,7 +91,7 @@ def part2():
     print(doas)
 
 def DAS_EXERCISE():
-    scenarioPath = "/rirs/Week_2/Part_2_1/45_135.pkl.gz"
+    scenarioPath = "/rirs/Week_4/wk4_1source_rev0-5.pkl.gz"
     acousticScenario = load_rirs(os.getcwd() + scenarioPath)
     fs = 44100
     # Get AS parameters
@@ -99,7 +99,7 @@ def DAS_EXERCISE():
     nmics = acousticScenario.nMicsPerArray
     d = acousticScenario.distBwMics
     # Define the speech and noise files
-    speechfiles = ["speech1.wav", "speech2.wav"]
+    speechfiles = ["speech1.wav"]
     noisefiles= []
     # Verify parameters
     verify_parameters(acousticScenario, fs, speechfiles)
@@ -109,9 +109,10 @@ def DAS_EXERCISE():
                                                                         speechfilenames=speechfiles,
                                                                         noisefilenames=noisefiles)
     # Stack the STFTs of the microphone signals
-    nfft = 1024
-    noverlap = 512
-    S, freqs_list = stack_stfts(mics_total, acousticScenario.fs, nfft, noverlap)
+    nperseg = 1024
+    noverlap = nperseg//2
+    nfft=2048
+    S, freqs_list = stack_stfts(mics_total, acousticScenario.fs, nperseg, nfft, noverlap)
     # Define the angles to commpute the pseudospectrum for
     thetas = np.arange(0, 180, 0.5)
     # Compute the MUSIC pseudospectrum and DOAs
@@ -153,10 +154,11 @@ def DAS_EXERCISE():
 
     # Listen to first mic recording
     # listen_to_array(speech_total[:, 0] + noise_total[:, 0], fs)
-    # listen_to_array(DASout, fs)
+    listen_to_array(DASout, fs)
 
 
 if __name__ == "__main__":
     # part_2()
-    part_3()
+    # part_3()
+    part_4()
     plt.show()

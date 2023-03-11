@@ -61,9 +61,10 @@ def create_micsigs_wk3(acousticScenario, nmics, speechfilenames, noisefilenames,
     mic_speech_recs_total = np.sum(mic_speech_recs, axis=(1))
     noise_matrix_total = np.sum(noise_matrix, axis=(1))
     # Calculate first mic received signal
-    mic_0_rec = mic_speech_recs[:, 0, 0] + mic_speech_recs[:, 0, 1] + noise_matrix[:, 0, 0] + noise_matrix[:, 0, 1]
-    mic_0_total_snr = calculate_snr(mic_speech_recs[:, 0, 0] + mic_speech_recs[:, 0, 1], noise_matrix[:, 0, 0] + noise_matrix[:, 0, 1])
-    print(f"Total SNR in mic 0: {mic_0_total_snr}")
+    if len(speechfilenames) > 1:
+        mic_0_rec = mic_speech_recs[:, 0, 0] + mic_speech_recs[:, 0, 1] + noise_matrix[:, 0, 0] + noise_matrix[:, 0, 1]
+        mic_0_total_snr = calculate_snr(mic_speech_recs[:, 0, 0] + mic_speech_recs[:, 0, 1], noise_matrix[:, 0, 0] + noise_matrix[:, 0, 1])
+        print(f"Total SNR in mic 0: {mic_0_total_snr}")
     # listen_to_array(mic_0_rec, 44100)
     return mics_total, mic_recs, mic_speech_recs, noise_matrix
 
