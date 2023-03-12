@@ -32,10 +32,16 @@ def part_3():
                                                                         speechfilenames=speechfiles,
                                                                         noisefilenames=noisefiles,
                                                                         duration=5)
+    print(f"Speech_recs shape: {speech_recs.shape}")
+    vad = abs(speech_recs[:, 0, :]) > np.std(speech_recs[:, 0, :]) * 1e-3
+    print(f"VAD len: {len(vad[:, 0])}")
+    print(f"Nonzero vad: {np.count_nonzero(vad[:, 0])}")
+    # exit()
     # Stack the STFTs of the microphone signals
-    nfft = 1024
+    nfft = 2048
     noverlap = 512
-    S, freqs_list = stack_stfts(mics_total, acousticScenario.fs, nfft, noverlap)
+    nperseg = 1024
+    S, freqs_list = stack_stfts(mics_total, acousticScenario.fs, nperseg, nfft, noverlap)
     # Define the angles to commpute the pseudospectrum for
     thetas = np.arange(0, 180, 0.5)
     # Compute the MUSIC pseudospectrum and DOAs
@@ -60,12 +66,13 @@ def part_3():
     noiseDAS = das_bf(noise_total, DOA, nmics, d, fs)
     
     DASout = speechDAS + noiseDAS
+    DASout = das_bf(speech_total+noise_total, DOA, nmics, d, fs)
     
     SNRin = calculate_snr(speech_total, noise_total)
     SNRoutDAS = calculate_snr(speechDAS, noiseDAS)
     print(f"SNRin: {SNRin}\nSNRoutDAS: {SNRoutDAS} ")
     
-    GSCout = gsc_td(speech_total, noise_total, DOA, nmics, d, fs)
+    GSCout = gsc_td(speech_total, noise_total, DOA, nmics, d, fs, vad=vad[:, 0])
 
     fig, axs = plt.subplots(3, 1, sharex=True)
     axs[0].plot(speech_total[:, 0] + noise_total[:, 0])
@@ -119,8 +126,7 @@ def part_4():
     speech_total = np.sum(speech_recs, axis=(2))
     noise_total = np.sum(noise_recs, axis=(2))
     # Find DOA nearest to 90°
-    index = np.abs(doas - 90).argmin()
-    DOA = doas[index]
+    DOA = doas[np.abs(doas - 90).argmin()]
     print(f"DOA steering towards: {DOA}")
 
     speechDAS = das_bf(speech_total, DOA, nmics, d, fs)
@@ -133,7 +139,8 @@ def part_4():
     print(f"SNRin: {SNRin}\nSNRoutDAS: {SNRoutDAS} ")
     
     GSCout = gsc_td(speech_total, noise_total, DOA, nmics, d, fs)
-
+    GSCout /= max(GSCout)
+    GSCout *= max(DASout)
     fig, axs = plt.subplots(3, 1, sharex=True)
     axs[0].plot(speech_total[:, 0] + noise_total[:, 0])
     axs[0].set_title("Mic 0 Recording")
@@ -147,5 +154,6 @@ def part_4():
     listen_to_array(GSCout, fs)
     
 if __name__ == "__main__":
-    part_3()
+    # part_3()
+    part_4()
     plt.show()

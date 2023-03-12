@@ -10,7 +10,7 @@ from Week_2.music import stack_stfts, music_wideband, plot_pseudspectrum
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 from Week_3.week3_helpers import create_micsigs_wk3, das_bf, calculate_snr, create_micsigs_wk4
-from Week_3.gsc import gsc_td, gsc_fd
+from Week_3.gsc import gsc_td
 from Week_2.music import music_wideband, compute_steering_vector
 import scipy.signal as ss
 import scipy
@@ -81,7 +81,7 @@ def week_4():
 def week_4_2():
     
     AS_RIRS = load_rirs(os.getcwd() + "/rirs/Week_4/lots_of_rirs.pkl.gz")
-    # AS.plot_asc()
+    AS_RIRS.plot_asc()
     
     angles = np.zeros((AS_RIRS.nMicsPerArray, AS_RIRS.RIRsAudio.shape[2]))
     for i in range(AS_RIRS.RIRsAudio.shape[2]):
@@ -100,7 +100,7 @@ def week_4_2():
 
     # ---------- Start static scenario 
 
-    AS = load_rirs(os.getcwd() + "/rirs/Week_4/single_source.pkl.gz")
+    AS = load_rirs(os.getcwd() + "/rirs/Week_4/wk4_rev1_singlesource.pkl.gz")
     nmics = AS.nMicsPerArray
     d = AS.distBwMics
     fs = AS.fs 
@@ -185,47 +185,32 @@ def week_4_2():
     output = np.zeros_like(fas)
     # Pass STFTs through adaptive filter after multiplication with blocking matrix
     for i in range(n_freqs):
-        f = ComplexNLMS(4, 0.1, 1e-6)
+        f = ComplexNLMS(4, 0.05, 1e-6)
         for j in range(n_times):
             s = S[:, i, j]
             block_mat = B[i, :, :].T
             x = np.dot(s, block_mat)
             filter_out = f.update(x, fas[i, j])
             output[i, j] -= filter_out
-            # y = np.dot(w, x)
-            # error = fas[i, j] - y
-            # w_prev = w
-            # w = w + mu * np.conj(x) * error / np.sum(np.abs(x)**2)
-            # output[i, j] = error
             
-            # # Check for convergence of weights
-            # delta_w = w - w_prev
-            # if np.linalg.norm(delta_w) < eps:
-            #     print(f"Converged at frequency {freq_list[i]} and time {j}")
-            #     break
-            
-            
-        # print(f"Weights: {w}")
-    # window = np.sqrt(np.hanning(n_freqs))
-    # freq_signal_windowed = output * window[:, np.newaxis]
     times, fas_reconstructed = ss.istft(fas, fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)
     times, signal_reconstructed = ss.istft(output, fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)
     times, mic_0_reconstructed = ss.istft(S[0, :, :], fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)
     
-    fig, axs = plt.subplots(4,1)
-    axs[0].plot(speech_recs[:, 0])
-    axs[0].set_title("First mic recording")
-    axs[1].plot(times, mic_0_reconstructed)
-    axs[1].set_title("First mic reconstructed")
-    axs[2].plot(times, fas_reconstructed)
-    axs[2].set_title("FAS reconstructed")
-    axs[3].plot(times, signal_reconstructed)
-    axs[3].set_title("Total reconstructed signal")
+    fig, axs = plt.subplots(2,1, sharex=True)
+    # axs[0].plot(speech_recs[:, 0] + noise_recs[:, 0])
+    # axs[0].set_title("First mic recording")
+    axs[0].plot(times, mic_0_reconstructed)
+    axs[0].set_title("First mic signal")
+    axs[1].plot(times, fas_reconstructed)
+    axs[1].set_title("FAS signal")
+    # axs[2].plot(times, signal_reconstructed)
+    # axs[2].set_title("Total reconstructed signal")
     
     # listen_to_array(mics_total[:, 0], fs)
     # listen_to_array(mic_0_reconstructed, fs)
-    listen_to_array(fas_reconstructed, fs)
-    listen_to_array(signal_reconstructed, fs)
+    # listen_to_array(fas_reconstructed, fs)
+    # listen_to_array(signal_reconstructed, fs)
 
 def week4_timevarying(reverb=False):
     
@@ -388,22 +373,7 @@ def week4_timevarying(reverb=False):
             x = np.dot(s, block_mat)
             filter_out = f.update(x, fas[i, j])
             output[i, j] -= filter_out
-            # y = np.dot(w, x)
-            # error = fas[i, j] - y
-            # w_prev = w
-            # w = w + mu * np.conj(x) * error / np.sum(np.abs(x)**2)
-            # output[i, j] = error
             
-            # # Check for convergence of weights
-            # delta_w = w - w_prev
-            # if np.linalg.norm(delta_w) < eps:
-            #     print(f"Converged at frequency {freq_list[i]} and time {j}")
-            #     break
-            
-            
-        # print(f"Weights: {w}")
-    # window = np.sqrt(np.hanning(n_freqs))
-    # freq_signal_windowed = output * window[:, np.newaxis]
     times, fas_reconstructed = ss.istft(fas, fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)
     times, signal_reconstructed = ss.istft(output, fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)
     times, mic_0_reconstructed = ss.istft(S[0, :, :], fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)

@@ -91,9 +91,6 @@ def part2():
     print(doas)
 
 def DAS_EXERCISE():
-
-
-
     scenarioPath = "/rirs/Week_4/wk4_1source_rev0-5.pkl.gz"
     acousticScenario = load_rirs(os.getcwd() + scenarioPath)
     fs = 44100

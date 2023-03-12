@@ -16,12 +16,12 @@ def das_bf(data, DOA, num_mics, d, fs):
     """
     c = 343  # Speed of sound in air
     # Generate microphone positions
-    mic_pos = np.zeros((num_mics, 3))
+    mic_pos = np.zeros((num_mics, 2))
     mic_pos[:, 0] = np.arange(num_mics) * d
 
     # Generate steering vector for DOA
     theta = np.radians(DOA)
-    steer_vec = np.exp(-1j * 2 * np.pi * fs * mic_pos[:, 0] * np.sin(theta) / c)
+    # steer_vec = np.exp(-1j * 2 * np.pi * fs * mic_pos[:, 0] * np.sin(theta) / c)
 
     # Initialize delay-and-sum beamformer weights
     weights = np.ones((num_mics,)) / num_mics
@@ -32,7 +32,8 @@ def das_bf(data, DOA, num_mics, d, fs):
     # Apply delay to each microphone
     delays = np.zeros((num_mics,))
     for i in range(num_mics):
-        delays[i] = -1 * mic_pos[i, 0] * np.sin(theta) / c
+        delays[i] = 1 * mic_pos[i, 0] * np.sin(theta) / c
+    
     # Create delay matrix
     delay_mat = np.zeros((num_mics, data.shape[0]))
     for i in range(num_mics):
@@ -40,4 +41,5 @@ def das_bf(data, DOA, num_mics, d, fs):
     # Sum delayed signals
     output = np.sum(delay_mat, axis=0)
     
+    output = np.roll(output, int(-max(delays) * fs))
     return output

@@ -56,7 +56,7 @@ class FIR_filter:
 
         return output_signal
     
-    def update(self, X, d):
+    def update(self, X, d, vad=None):
         """
         Updates the weights of the FIR filter using the filtered signal and a desired output signal.
 
@@ -74,8 +74,9 @@ class FIR_filter:
             filtered_signal_1d = np.concatenate((filtered_signal_1d, np.zeros(delta)))
         error_signal = d - filtered_signal_1d
         for n in range(X.shape[1] - self.num_taps + 1):
-            x = X[:, n:n + self.num_taps]
-            error = error_signal[n]
-            y = np.sum(x * self.weights, axis=1)
-            self.weights += self.step_size * x.T @ (error / np.sum(x ** 2, axis=1))
-            self.weights *= self.leaky_factor
+            if (vad is not None and vad[n] == True) or (vad is None):
+                x = X[:, n:n + self.num_taps]
+                error = error_signal[n]
+                y = np.sum(x * self.weights, axis=1)
+                self.weights += self.step_size * x.T @ (error / np.sum(x ** 2, axis=1))
+                self.weights *= self.leaky_factor
