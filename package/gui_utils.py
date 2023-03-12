@@ -455,6 +455,7 @@ class RIRg_GUI:
         axes.set_aspect('equal', 'box')
         axes.set_xlabel('$x$ [m]')
         axes.set_ylabel('$y$ [m]')
+        plt.savefig('newfig.png',dpi=400)
         plt.tight_layout()
 
 

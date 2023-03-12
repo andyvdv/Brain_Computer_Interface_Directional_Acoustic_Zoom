@@ -277,13 +277,7 @@ def week4_timevarying(reverb=False):
         AS = load_rirs(os.getcwd() + "/rirs/Week_4/part2/rirs_part2_{0}_{1}rev.pkl.gz".format(i,rev))
         print("Coordinates of the two currently used sources :", AS.audioCoords)
         
-        mics_total_summed = np.sum(speech_recs_norev, axis=(2))
-        S, freq_list = stack_stfts(mics_total_summed.T, fs=fs, nperseg=nperseg, nfft=nfft, noverlap=noverlap, window=sqrt_hann)
-        thetas = np.arange(0, 180, 0.5)
-        _, doas = music_wideband(S, nmics=nmics, nsources=Q, freqs_list=freq_list, d=d, angles=thetas)
-        DOA = doas[0]
-
-        print("DOA = " + str(DOA) + "°")
+        
 
         mics_total, mic_recs, speech_recs, noise_recs = create_micsigs_wk4(acousticScenario=AS, 
                                                                             nmics=nmics, 
@@ -292,10 +286,21 @@ def week4_timevarying(reverb=False):
                                                                             duration=10,
                                                                             startfrom=fs*(i-1)*10)
         
-        mics_total_norev = np.concatenate((mics_total_norev,mics_total),axis=1)
-        mic_recs_norev = np.concatenate((mic_recs_norev,mic_recs),axis=1)
-        speech_recs_norev = np.concatenate((speech_recs_norev,speech_recs),axis=1)
-        noise_recs_norev = np.concatenate((noise_recs_norev, noise_recs), axis=1)
+        mics_total_summed = np.sum(speech_recs, axis=(2))
+        S, freq_list = stack_stfts(mics_total_summed.T, fs=fs, nperseg=nperseg, nfft=nfft, noverlap=noverlap, window=sqrt_hann)
+        thetas = np.arange(0, 180, 0.5)
+        _, doas = music_wideband(S, nmics=nmics, nsources=Q, freqs_list=freq_list, d=d, angles=thetas)
+        DOA = doas[0]
+
+        print("DOA = " + str(DOA) + "°")
+
+
+
+
+        mics_total_norev = np.concatenate((mics_total_norev,mics_total),axis=0)
+        mic_recs_norev = np.concatenate((mic_recs_norev,mic_recs),axis=0)
+        speech_recs_norev = np.concatenate((speech_recs_norev,speech_recs),axis=0)
+        noise_recs_norev = np.concatenate((noise_recs_norev, noise_recs), axis=0)
 
 
     mics_total_summed = np.sum(speech_recs_norev, axis=(2))
@@ -379,7 +384,7 @@ def week4_timevarying(reverb=False):
     times, mic_0_reconstructed = ss.istft(S[0, :, :], fs=fs, nfft=nfft, nperseg=nperseg, noverlap=noverlap, window=sqrt_hann)
     
     fig, axs = plt.subplots(4,1)
-    axs[0].plot(speech_recs[:, 0])
+    axs[0].plot(times, speech_recs[:, 0])
     axs[0].set_title("First mic recording")
     axs[1].plot(times, mic_0_reconstructed)
     axs[1].set_title("First mic reconstructed")
@@ -422,7 +427,6 @@ class ComplexNLMS:
 
         
 if __name__ == "__main__":
-    # week_4()
-    week_4_2()
-    # week4_timevarying()
+    # week_4_2()
+    week4_timevarying()
     plt.show()
