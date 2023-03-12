@@ -9,7 +9,7 @@ import numpy as np
 from Week_2.music import *
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
-from week3_helpers import create_micsigs_wk3, das_bf, calculate_snr
+from week3_helpers import create_micsigs_wk3, das_bf, calculate_snr, create_micsigs_wk4
 from part2 import part_2
 from part3 import part_3, part_4
 from gsc import gsc_td
@@ -136,6 +136,8 @@ def DAS_EXERCISE():
     DOA = doas[index]
     print(f"DOA steering towards: {DOA}")
 
+    # -------------- END STATIC PART
+
     speechDAS = das_bf(speech_total, DOA, nmics, d, fs)
     noiseDAS = das_bf(noise_total, DOA, nmics, d, fs)
     
@@ -160,8 +162,104 @@ def DAS_EXERCISE():
     listen_to_array(DASout, fs)
 
 
+def week3_timevarying(reverb = False):
+    rev = 0
+    if reverb == True:
+        rev=1
+    scenarioPath = "/rirs/Week_4/part2/rirs_part2_1_{}rev.pkl.gz".format(rev)
+    acousticScenario = load_rirs(os.getcwd() + scenarioPath)
+    fs = 44100
+    # Get AS parameters
+    nsources = acousticScenario.RIRsAudio.shape[2]
+    nmics = acousticScenario.nMicsPerArray
+    d = acousticScenario.distBwMics
+    # Define the speech and noise files
+    speechfiles = ["part1_track1_dry.wav", "part1_track2_dry.wav"]
+    noisefilenames = []
+
+    # Verify parameters
+    verify_parameters(acousticScenario, fs, speechfiles)
+
+    
+    mics_total, mic_recs, speech_recs, noise_recs = create_micsigs_wk4(acousticScenario=acousticScenario, 
+                                                                        nmics=nmics, 
+                                                                        speechfilenames=speechfiles,
+                                                                        noisefilenames=noisefilenames,
+                                                                        duration=10)
+
+
+    for i in range(2,6):
+        AS = load_rirs(os.getcwd() + "/rirs/Week_4/part2/rirs_part2_{0}_{1}rev.pkl.gz".format(i,rev))
+        print("Coordinates of the two currently used sources :", AS.audioCoords)
+
+        mtotal, mrecs, srecs, nrecs= create_micsigs_wk4(acousticScenario=AS, 
+                                                                            nmics=nmics, 
+                                                                            speechfilenames=speechfiles,
+                                                                            noisefilenames=noisefilenames,
+                                                                            duration=10,
+                                                                            startfrom=fs*(i-1)*10)
+        
+        mics_total = np.concatenate((mics_total,mtotal),axis=0)
+        mic_recs = np.concatenate((mic_recs,mrecs),axis=0)
+        speech_recs= np.concatenate((speech_recs,srecs),axis=0)
+        noise_recs = np.concatenate((noise_recs,nrecs),axis=0)
+
+
+    # Stack the STFTs of the microphone signals
+    mics_total_summed = np.sum(speech_recs + noise_recs, axis=(2))
+
+    nperseg = 1024
+    noverlap = nperseg//2
+    nfft=2048
+    S, freqs_list = stack_stfts(mics_total_summed.T, acousticScenario.fs, nperseg, nfft, noverlap)
+    # Define the angles to commpute the pseudospectrum for
+    thetas = np.arange(0, 180, 0.5)
+    # Compute the MUSIC pseudospectrum and DOAs
+    spectrum, doas = music_wideband(S, nmics, nsources, freqs_list, d, thetas)
+
+    # plot_pseudspectrum(thetas, spectrum, "Figure")
+
+    # Steer to source that is closest to 90°
+    # Parameters
+    num_mics = acousticScenario.nMicsPerArray   # Number of microphones
+    d = acousticScenario.distBwMics   # Distance between adjacent microphones
+    fs = acousticScenario.fs   # Sampling frequency
+    c = 343   # Speed of sound
+    speech_total = np.sum(speech_recs, axis=(2))
+    noise_total = np.sum(noise_recs, axis=(2))
+    # Find DOA nearest to 90°
+    index = np.abs(doas - 90).argmin()
+    DOA = doas[index]
+    print(f"DOA steering towards: {DOA}")
+
+    speechDAS = das_bf(speech_total, DOA, nmics, d, fs)
+    noiseDAS = das_bf(noise_total, DOA, nmics, d, fs)
+    
+    DASout = speechDAS + noiseDAS
+    
+    SNRin = calculate_snr(speech_total, noise_total)
+    SNRoutDAS = calculate_snr(speechDAS, noiseDAS)
+    print(f"SNRin: {SNRin}\nSNRoutDAS: {SNRoutDAS} ")
+    
+    GSCout = gsc_td(speech_total, noise_total, DOA, nmics, d, fs)
+
+    fig, axs = plt.subplots(3, 1, sharex=True)
+    axs[0].plot(speech_total[:, 0] + noise_total[:, 0])
+    axs[0].set_title("Mic 0 Recording")
+    axs[1].plot(DASout)
+    axs[1].set_title("DAS BF Output")
+    axs[2].plot(GSCout)
+    axs[2].set_title("GSC Output")
+    # Compare mic 0 recording to the DAS output
+    listen_to_array(speech_total[:, 0] + noise_total[:, 0], fs)
+    listen_to_array(DASout, fs)
+    listen_to_array(GSCout, fs)
+
+    return
+
 if __name__ == "__main__":
     # part_2()
     # part_3()
-    part_4()
+    # part_4()
+    week3_timevarying()
     plt.show()

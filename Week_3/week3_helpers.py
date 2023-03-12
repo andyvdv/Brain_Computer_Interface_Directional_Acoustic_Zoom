@@ -28,7 +28,7 @@ def create_micsigs_wk3(acousticScenario, nmics, speechfilenames, noisefilenames,
         
     # 3) Retrieve computed RIRs
     mic_speech_recs = None
-    mic_noise_recs = None
+    mic_noise_recs = []
     mic_recs = None
     # Loop over speech sources
     for i in range(0, len(speech_data)):
@@ -148,7 +148,7 @@ def create_micsigs_wk4(acousticScenario, nmics, speechfilenames, noisefilenames,
         
     # 3) Retrieve computed RIRs
     mic_speech_recs = None
-    mic_noise_recs = None
+    mic_noise_recs = []
     mic_recs = None
     # Loop over speech sources
     for i in range(0, len(speech_data)):
@@ -186,4 +186,4 @@ def create_micsigs_wk4(acousticScenario, nmics, speechfilenames, noisefilenames,
         mic_0_total_snr = calculate_snr(mic_speech_recs[:, 0, 0] + mic_speech_recs[:, 0, 1], noise_matrix[:, 0, 0] + noise_matrix[:, 0, 1])
         print(f"Total SNR in mic 0: {mic_0_total_snr}")
     # listen_to_array(mic_0_rec, 44100)
-    return mics_total, mic_recs, mic_speech_recs
+    return mics_total, mic_recs, mic_speech_recs, noise_matrix

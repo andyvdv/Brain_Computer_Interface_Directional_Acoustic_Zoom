@@ -80,7 +80,7 @@ def part_3():
     
 
 def part_4():
-    scenarioPath = "/rirs/Week_4/wk4_rev1_singlesource.pkl.gz"
+    scenarioPath = "/rirs/Week_4/part2/rirs_part2_1_0rev.pkl.gz"
     acousticScenario = load_rirs(os.getcwd() + scenarioPath)
     fs = 44100
     # Get AS parameters
@@ -88,8 +88,8 @@ def part_4():
     nmics = acousticScenario.nMicsPerArray
     d = acousticScenario.distBwMics
     # Define the speech and noise files
-    speechfiles = ["speech1.wav"]
-    noisefiles= []
+    speechfiles = ["part1_track1_dry.wav"]
+    noisefiles= ["part1_track2_dry.wav"]
     # Verify parameters
     verify_parameters(acousticScenario, fs, speechfiles)
     print("---- Week 3 Part 3 ----")
@@ -97,7 +97,7 @@ def part_4():
                                                                         nmics=nmics, 
                                                                         speechfilenames=speechfiles,
                                                                         noisefilenames=noisefiles,
-                                                                        duration=5)
+                                                                        duration=10)
     # Stack the STFTs of the microphone signals
     nperseg = 1024
     noverlap = nperseg//2
@@ -142,7 +142,7 @@ def part_4():
     axs[2].plot(GSCout)
     axs[2].set_title("GSC Output")
     # Compare mic 0 recording to the DAS output
-    listen_to_array(speech_total[:, 0] + noise_total[:, 0], fs)
+    listen_to_array(speech_total[:, 1] + noise_total[:, 1], fs)
     listen_to_array(DASout, fs)
     listen_to_array(GSCout, fs)
     
