@@ -16,8 +16,11 @@ import scipy.signal as ss
 import scipy
 import math, json
 
-def part2():
-    scenarioPath = "/rirs/Week_4/part2/rirs_part2_1_0rev.pkl.gz"
+def part2(reverb=False):
+    rev = 0
+    if reverb == True:
+        rev=1
+    scenarioPath = "/rirs/Week_4/part2/rirs_part2_1_{}rev.pkl.gz".format(rev)
     AS = load_rirs(os.getcwd() + scenarioPath)
     nmics = AS.nMicsPerArray
     d = AS.distBwMics
@@ -54,7 +57,7 @@ def part2():
 
     # NOW DO IT FOR THE REST OF THE RIRs
     for i in range(2,6):
-        AS = load_rirs(os.getcwd() + "/rirs/Week_4/part2/rirs_part2_{}_0rev.pkl.gz".format(i))
+        AS = load_rirs(os.getcwd() + "/rirs/Week_4/part2/rirs_part2_{0}_{1}rev.pkl.gz".format(i,rev))
         print("Coordinates of the two currently used sources :", AS.audioCoords)
         
         mics_total_summed = np.sum(speech_recs_norev, axis=(2))
@@ -83,7 +86,7 @@ def part2():
     spectrum, doas = music_wideband(S, nmics=nmics, nsources=Q, freqs_list=freq_list, d=d, angles=thetas)
     DOA = doas[0]
 
-    print("DOA = ", DOA)
+    print("DOA = " + str(DOA) + "°")
 
     listen_to_array(mics_total_norev[1],fs)
     plt.plot(mics_total_norev[1])
@@ -97,4 +100,4 @@ def part2():
 
 
 if __name__ == "__main__":
-    part2()
+    part2(reverb=True)
