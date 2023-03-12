@@ -40,11 +40,12 @@ def week_4():
     # Generate the square-root Hanning window
     sqrt_hann = np.sqrt(ss.windows.hann(nfft, "periodic"))
     mics_total = np.sum(speech_recs + noise_recs, axis=(2))
-    S, freq_list = stack_stfts(mics_total.T, fs=fs, nfft=nfft, noverlap=noverlap, window=sqrt_hann)
+    S, freq_list = stack_stfts(mics_total.T, fs=fs, nperseg=1024, nfft=nfft, noverlap=noverlap, window=sqrt_hann)
     
     thetas = np.arange(0, 180, 0.5)
     spectrum, doas = music_wideband(S, nmics=nmics, nsources=Q, freqs_list=freq_list, d=d, angles=thetas)
     plot_pseudspectrum(thetas, spectrum, "MUSIC Spectrum")
+
     print(f"The estimated DOAs are: {doas}")
     # Find DOA nearest to 90°
     doa_index = np.abs(doas - 90).argmin()
