@@ -23,7 +23,7 @@ This code is written in python. To use it you will need:
 To open these notebooks in Google Colab:
 
 - Login to your Google Colab account.
-- Open a new notebook. In code cell enter: ```!git clone https://github.com/abskjha/p-o-issp-2021.git```
+- Open a new notebook. In code cell enter: ```!git clone https://github.com/LiesBollens/p-d-issp-2023.git```
 
 **Note:** Google Colab allows active session upto 12hrs. After 12 hrs, the session expires and all the data in the environment is **deleted**. Therefore, **ALWAYS keep a backup**. Another way to solve this is by saving the code and data in google drive and mounting google drive on colab:
 
