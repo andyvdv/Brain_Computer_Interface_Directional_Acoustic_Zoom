@@ -15,3 +15,5 @@ print("\n")
 # Step 2: Decompose the audio in 28 frequency subbands using GTF.
 
 cf_low, cf_high = (50, 5000) # set the low and high center frequency
+n_bands = 28 # set number of frequency subbands
+
