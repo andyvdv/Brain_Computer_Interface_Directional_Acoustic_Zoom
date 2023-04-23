@@ -1,0 +1,191 @@
+{
+  "trial_id": "03",
+  "hyperparameters": {
+    "space": [
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "conv1_filters",
+          "default": null,
+          "conditions": [],
+          "min_value": 32,
+          "max_value": 64,
+          "step": 32,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Float",
+        "config": {
+          "name": "conv1_dropout",
+          "default": 0.1,
+          "conditions": [],
+          "min_value": 0.1,
+          "max_value": 0.5,
+          "step": 0.1,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "conv2_filters",
+          "default": null,
+          "conditions": [],
+          "min_value": 32,
+          "max_value": 64,
+          "step": 32,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Float",
+        "config": {
+          "name": "conv2_dropout",
+          "default": 0.1,
+          "conditions": [],
+          "min_value": 0.1,
+          "max_value": 0.5,
+          "step": 0.1,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "conv3_filters",
+          "default": null,
+          "conditions": [],
+          "min_value": 32,
+          "max_value": 64,
+          "step": 32,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Float",
+        "config": {
+          "name": "conv3_dropout",
+          "default": 0.1,
+          "conditions": [],
+          "min_value": 0.1,
+          "max_value": 0.5,
+          "step": 0.1,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "dense1_units",
+          "default": null,
+          "conditions": [],
+          "min_value": 32,
+          "max_value": 96,
+          "step": 32,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Float",
+        "config": {
+          "name": "dense1_dropout",
+          "default": 0.1,
+          "conditions": [],
+          "min_value": 0.1,
+          "max_value": 0.5,
+          "step": 0.1,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "dense2_units",
+          "default": null,
+          "conditions": [],
+          "min_value": 16,
+          "max_value": 64,
+          "step": 16,
+          "sampling": "linear"
+        }
+      },
+      {
+        "class_name": "Float",
+        "config": {
+          "name": "learning_rate",
+          "default": 0.0001,
+          "conditions": [],
+          "min_value": 0.0001,
+          "max_value": 0.01,
+          "step": null,
+          "sampling": "log"
+        }
+      }
+    ],
+    "values": {
+      "conv1_filters": 64,
+      "conv1_dropout": 0.4,
+      "conv2_filters": 64,
+      "conv2_dropout": 0.4,
+      "conv3_filters": 64,
+      "conv3_dropout": 0.30000000000000004,
+      "dense1_units": 32,
+      "dense1_dropout": 0.1,
+      "dense2_units": 16,
+      "learning_rate": 0.0009900158563390824
+    }
+  },
+  "metrics": {
+    "metrics": {
+      "loss": {
+        "direction": "min",
+        "observations": [
+          {
+            "value": [
+              0.2820946127176285
+            ],
+            "step": 4
+          }
+        ]
+      },
+      "accuracy": {
+        "direction": "max",
+        "observations": [
+          {
+            "value": [
+              0.8932145237922668
+            ],
+            "step": 4
+          }
+        ]
+      },
+      "val_loss": {
+        "direction": "min",
+        "observations": [
+          {
+            "value": [
+              0.4685017963250478
+            ],
+            "step": 4
+          }
+        ]
+      },
+      "val_accuracy": {
+        "direction": "max",
+        "observations": [
+          {
+            "value": [
+              0.8355855743090311
+            ],
+            "step": 4
+          }
+        ]
+      }
+    }
+  },
+  "score": 0.8355855743090311,
+  "best_step": 4,
+  "status": "COMPLETED",
+  "message": null
+}

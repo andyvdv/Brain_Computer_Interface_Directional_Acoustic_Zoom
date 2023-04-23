@@ -82,3 +82,5 @@ Phase_2/data/stimuli/misc_5.wav
 Phase_2/data/stimuli/misc_7.wav
 Phase_2/data/stimuli/misc_8.wav
 Phase_2/data/stimuli/misc_9.wav
+Phase_2/data/.DS_Store
+*.npy
