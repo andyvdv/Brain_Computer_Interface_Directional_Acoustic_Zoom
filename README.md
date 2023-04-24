@@ -11,3 +11,7 @@ The python script of the LR model can be found in Phase_2/Week_1/LS_LOOCV.py and
 • w_length: The window length, which is the number of samples to use. Choose from 1200, 600, 300, or 100, which correspond to 60s, 30s, 15s, and 5s, respectively.
 
 • folder_dk: The path to the d_k file to use. Replace "d_k" with the appropriate filename, such as "d_k_K100_30s" for a precomputed d_k file with K=100 and w_length=30s * 20Hz = 600.
+
+### Requirements:
+
+- All the eeg files must be inside the folder Phase_2/data/eeg/ and the audio files inside the folder Phase_2/data/stimuli/ (they can't be uploaded on github due to the large size of these).
