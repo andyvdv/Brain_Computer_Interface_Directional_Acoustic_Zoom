@@ -373,7 +373,7 @@ if __name__ == "__main__":
 
     # ----- TO CHOOSE -----
     K = 100 # Number of EEG trials to use (Choose 50, 100, 200, 300 or 484)
-    max_test = 20 # Number of EEG trials that we actually one to test and look for their average accuracy (Put K if you want to use all)
+    max_test = K # Number of EEG trials that we actually one to test and look for their average accuracy (Put K if you want to use all)
     w_length = 300 # Window length: Number of samples to use (Choose 1200, 600, 300, 100) = (60s, 30s, 15s, 5s)
     folder_dk = os.getcwd() + "/Phase_2/data/d_k" # d_k file to use (Ex: replace d_k with d_k_K100_30s for precomputed d_k with K=100, w_length = 30s * 20Hz = 600)
     # ----- END -----
