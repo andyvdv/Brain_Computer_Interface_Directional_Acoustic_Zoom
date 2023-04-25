@@ -1,17 +1,17 @@
 import os, sys
 sys.path.append(os.getcwd())
-from helpers import create_micsigs_week3, verify_parameters, create_micsigs, create_micsigs_week4
-from package.gui_utils import load_rirs
-from package.general import listen_to_array
+from Phase_1.helpers import create_micsigs_week3, verify_parameters, create_micsigs, create_micsigs_week4
+from Phase_1.package.gui_utils import load_rirs
+from Phase_1.package.general import listen_to_array
 import scipy.signal as ss
 import scipy.linalg as LA
 import numpy as np
-from Week_2.music import stack_stfts, music_wideband, plot_pseudspectrum
+from Phase_1.Week_2.music import stack_stfts, music_wideband, plot_pseudspectrum
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
-from Week_3.week3_helpers import create_micsigs_wk3, das_bf, calculate_snr, create_micsigs_wk4
-from Week_3.gsc import gsc_td
-from Week_2.music import music_wideband, compute_steering_vector
+from Phase_1.Week_3.week3_helpers import create_micsigs_wk3, das_bf, calculate_snr, create_micsigs_wk4
+from Phase_1.Week_3.gsc import gsc_td
+from Phase_1.Week_2.music import music_wideband, compute_steering_vector
 import scipy.signal as ss
 import scipy
 import math, json
